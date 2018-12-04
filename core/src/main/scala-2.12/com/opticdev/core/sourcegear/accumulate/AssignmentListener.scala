@@ -42,8 +42,6 @@ case class AssignmentListener(assignmentComponent: OMComponentWithPropertyPath[O
           sourceGearContext.fileTokenRegistry.getExpanded(nodeIdentifier.get)
         }
 
-        println(entryOption)
-
         val (inScope, value) = entryOption.get match {
           case imported: Imported[SGContext] => {
             (true, imported.model.asInstanceOf[ModelNode].expandedValue()(imported.context))

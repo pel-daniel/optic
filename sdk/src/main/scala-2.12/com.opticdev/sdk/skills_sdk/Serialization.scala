@@ -33,7 +33,8 @@ object Serialization {
   ))
 
   implicit lazy val computedFieldFunctionFormat = EnumFormatsFromTypes.newFormats[ComputedFieldFunction](Map(
-    "concat-strings" -> ConcatStrings
+    "concat-strings" -> ConcatStrings,
+    "concat-arrays" -> ConcatArrays
   ))
 
   implicit lazy val omchildrenruletypeFormat = EnumFormatsFromTypes.newFormats[OMChildrenRuleType](Map(

@@ -16,7 +16,6 @@ import com.opticdev.sdk.skills_sdk.LensRef
 import scala.util.Try
 
 case class ComputedFieldListener(computedField: OMComponentWithPropertyPath[OMLensComputedFieldComponent], sublisteners: Vector[Listener], lensRef: LensRef) extends Listener {
-
   override def collect(implicit astGraph: AstGraph, modelNode: BaseModelNode, sourceGearContext: SGContext): Try[ModelField] = Try {
     val hiddenValue = modelNode.hiddenValue
 
@@ -46,7 +45,6 @@ case class ComputedFieldListener(computedField: OMComponentWithPropertyPath[OMLe
         argumentsMap.put(index, evaluated.map(_.value).toOption)
       }
     })
-
 
     require(argumentsMap.forall(_._2.isDefined), "Computed Field can not be computed because required arguments could not be resolved")
 

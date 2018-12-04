@@ -40,7 +40,7 @@ object DataDirectoryConfig {
 
     if (readConfigStatus.opticSkillsSDKVersion != defaultStatus.opticSkillsSDKVersion) {
       //clear the markdown, package & sg cache
-      println("MIGRATING OPTIC MARKDOWN")
+      println("MIGRATING OPTIC SKILLS")
       DataDirectory.reset
       saveConfigStatus()
     }
