@@ -24,6 +24,8 @@ object Dependencies {
 
     "org.scala-lang.modules" %% "scala-xml" % "1.1.0",
 
+    "com.typesafe.play" %% "play-json" % "2.6.11",
+
     //graph
     "org.scala-graph" %% "graph-core" % "1.12.3",
     "org.scala-graph" %% "graph-constrained" % "1.12.3"
@@ -32,7 +34,7 @@ object Dependencies {
   val commonDependencies: Seq[ModuleID] =  Seq(
     "org.apache.commons" % "commons-lang3" % "3.6",
     "com.github.pathikrit" % "better-files_2.12" % betterFilesVersion,
-    "com.typesafe.play" %% "play-json" % "2.6.2",
+    "com.typesafe.play" %% "play-json" % "2.6.11",
     "org.scalactic" %% "scalactic" % scalaTestVersion,
     "org.scalatest" %% "scalatest" % scalaTestVersion % "test",
     "com.vdurmont" % "semver4j" % "2.2.0",
@@ -41,9 +43,7 @@ object Dependencies {
   )
 
   val sdkDependencies: Seq[ModuleID] = sharedDependencies ++ Seq(
-    "com.typesafe.play" %% "play-json" % "2.6.2",
     "com.github.fge" % "json-schema-validator" % "2.2.6",
-    "org.gnieh" %% "diffson-play-json" % "2.2.1",
     "org.apache.commons" % "commons-compress" % "1.16.1",
     "net.jcazevedo" %% "moultingyaml" % "0.4.0"
   )
@@ -54,7 +54,6 @@ object Dependencies {
     "com.typesafe.akka" %% "akka-http-jackson" % akkaHttpVersion,
     "de.heikoseeberger" %% "akka-http-play-json" % "1.19.0-M2",
 
-    "com.typesafe.play" %% "play-json" % "2.6.2",
     "com.github.fge" % "json-schema-validator" % "2.2.6",
     "org.gnieh" %% "diffson-play-json" % "2.2.1",
 
@@ -74,7 +73,6 @@ object Dependencies {
   )
 
   val coreDependencies : Seq[ModuleID] = sharedDependencies ++ Seq(
-    "com.typesafe.play" %% "play-json" % "2.6.2",
     "com.github.fge" % "json-schema-validator" % "2.2.6",
     "org.gnieh" %% "diffson-play-json" % "2.2.1",
 
@@ -99,7 +97,6 @@ object Dependencies {
 
   val opmDependencies : Seq[ModuleID] = sharedDependencies ++ Seq(
     "net.jcazevedo" %% "moultingyaml" % "0.4.0",
-    "com.typesafe.play" %% "play-json" % "2.6.2",
     "com.typesafe.play" %% "play-ws-standalone" % "1.1.3",
     "com.typesafe.play" %% "play-ahc-ws-standalone" % "1.1.2",
     "com.typesafe.play" %% "play-ws-standalone-json" % "1.1.2",
@@ -113,5 +110,4 @@ object Dependencies {
     "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
     "com.typesafe.akka" %% "akka-stream" % "2.5.4"
   )
-
 }

@@ -3,12 +3,13 @@ package com.opticdev.core.sourcegear.graph
 import better.files.File
 import com.opticdev.common.ObjectRef
 import com.opticdev.core.sourcegear.annotations.FileNameAnnotation
-import com.opticdev.core.sourcegear.graph.edges.{Exports, InFile, YieldsModel}
+import com.opticdev.core.sourcegear.graph.edges.{Exports, InFile, InProject, YieldsModel}
 import com.opticdev.core.sourcegear.graph.model.BaseModelNode
 import com.opticdev.core.sourcegear.graph.objects.ObjectNode
 import com.opticdev.core.sourcegear.project.{OpticProject, ProjectBase}
 import com.opticdev.core.sourcegear.sync.SyncGraph
 import com.opticdev.common.graph.{AstGraph, CommonAstNode, CustomEdge, WithinFile}
+import com.opticdev.core.sourcegear.graph.projects.ProjectNode
 import com.opticdev.parsers.token_values.External
 import com.opticdev.parsers.utils.Crypto
 import com.opticdev.sdk.descriptions.PackageExportable
@@ -150,6 +151,41 @@ class ProjectGraphWrapper(val projectGraph: ProjectGraph)(implicit val project: 
   def addProjectSubGraph(subgraphs: ProjectGraph*) = {
     subgraphs.foreach(sg => projectGraph ++= sg)
     checkForUpdatedNamedModelNodes
+  }
+
+  //Runtime Object
+  def addRuntimeObject(objectNode: ObjectNode): Unit = {
+    val runtimeGraphName = project.name+"__runtime"
+    val existingProjectGraph = projectGraph.nodes.collectFirst{
+      case a if a.value.isInstanceOf[ProjectNode] && a.value.asInstanceOf[ProjectNode].name == runtimeGraphName
+      => a.value.asInstanceOf[ProjectNode]
+    }
+    if (existingProjectGraph.isDefined) {
+      val projectNode = existingProjectGraph.get
+      Try { //delete any nodes with same name
+        projectGraph.allSuccessorsOf(projectNode).toVector.collectFirst {
+          case a if a.isObject && a.asInstanceOf[ObjectNode].name == objectNode.name => a.asInstanceOf[ObjectNode]
+        }.foreach(projectGraph.remove)
+      }
+
+      projectGraph add (projectNode ~+#> objectNode) (InProject())
+
+    } else {
+      val newProjectGraph = SerializeProjectGraph.generateFromConstants(Vector(objectNode), runtimeGraphName)
+      addProjectSubGraph(newProjectGraph)
+    }
+  }
+
+  def clearRuntimeObjects: Unit = {
+    val runtimeGraphName = project.name+"__runtime"
+    val existingProjectGraph = projectGraph.nodes.collectFirst{
+      case a if a.value.isInstanceOf[ProjectNode] && a.value.asInstanceOf[ProjectNode].name == runtimeGraphName
+      => a.value.asInstanceOf[ProjectNode]
+    }
+    if (existingProjectGraph.isDefined) {
+      projectGraph.allSuccessorsOf(existingProjectGraph.get).foreach(i => projectGraph -= i)
+      projectGraph -= projectGraph.get(existingProjectGraph.get)
+    }
   }
 
 }

@@ -13,6 +13,7 @@ import com.opticdev.common.{BuildInfo, SchemaRef}
 import com.opticdev.core.sourcegear.project.ProjectInfo
 import com.opticdev.core.sourcegear.project.status.{ImmutableProjectStatus, NotLoaded, ProjectStatus}
 import com.opticdev.server.http.HTTPResponse
+import com.opticdev.server.http.routes.RuntimeProtocol._
 import com.opticdev.server.state.ProjectsManager
 import play.api.libs.json._
 import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport._
@@ -72,6 +73,30 @@ class ProjectRoute(implicit executionContext: ExecutionContext, projectsManager:
         //trigger a rebuild all of active projects
         projectsManager.activeProjects.foreach(_.fullRefresh)
         complete("Done")
+      }
+    } ~
+    post {
+      path("objects") {
+        entity(as[AddObject]) { addObject =>
+          val project = projectsManager.lookupProject(addObject.projectName)
+          if (project.isSuccess) {
+            project.get.projectGraphWrapper.addRuntimeObject(addObject.toObjectNode)
+            complete(StatusCodes.OK, "Added")
+          } else {
+            complete(StatusCodes.NotFound, "Project Not Found")
+          }
+        }
+      }
+      path("clear-objects") {
+        entity(as[ClearRuntimeObjects]) { clearRuntime =>
+          val project = projectsManager.lookupProject(clearRuntime.projectName)
+          if (project.isSuccess) {
+            project.get.projectGraphWrapper.clearRuntimeObjects
+            complete(StatusCodes.OK, "Added")
+          } else {
+            complete(StatusCodes.NotFound, "Project Not Found")
+          }
+        }
       }
     }
 

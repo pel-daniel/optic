@@ -7,6 +7,8 @@ import com.opticdev.core.sourcegear.SourceGear
 import com.opticdev.core.sourcegear.graph.model.BaseModelNode
 import com.opticdev.core.sourcegear.project.{Project, StaticSGProject}
 import com.opticdev.common.SchemaRef
+import com.opticdev.core.sourcegear.graph.objects.ObjectNode
+import play.api.libs.json.JsString
 
 class ProjectGraphWrapperSpec extends AkkaTestFixture("ProjectGraphWrapperTest") with GearUtils {
 
@@ -61,6 +63,38 @@ class ProjectGraphWrapperSpec extends AkkaTestFixture("ProjectGraphWrapperTest")
     projectGraphWrapper.removeFile(file)
 
     assert(projectGraphWrapper.projectGraph.isEmpty)
+  }
+
+  describe("runtime objects") {
+
+    it("can add new runtime objects to project graph") {
+      val projectGraphWrapper = ProjectGraphWrapper.empty
+      projectGraphWrapper.addRuntimeObject(ObjectNode("Test", None, JsString("Hello World"), fromRuntime = true))
+
+      assert(projectGraphWrapper.projectGraph.nodes.size == 2)
+    }
+
+    it("will replace node with new one if name already exists") {
+      val projectGraphWrapper = ProjectGraphWrapper.empty
+      projectGraphWrapper.addRuntimeObject(ObjectNode("Test", None, JsString("Hello World"), fromRuntime = true))
+      projectGraphWrapper.addRuntimeObject(ObjectNode("Test", None, JsString("Hello Goodbye"), fromRuntime = true))
+
+      assert(projectGraphWrapper.projectGraph.nodes.size == 2)
+
+      assert(projectGraphWrapper.projectGraph.nodes
+        .collectFirst{ case a if a.value.isObject => a.value.asInstanceOf[ObjectNode].value}.contains(JsString("Hello Goodbye")))
+    }
+
+    it("can remove all runtime objects") {
+      val projectGraphWrapper = ProjectGraphWrapper.empty
+      projectGraphWrapper.addRuntimeObject(ObjectNode("Test", None, JsString("Hello World"), fromRuntime = true))
+      projectGraphWrapper.addRuntimeObject(ObjectNode("TestA", None, JsString("Hello Goodbye"), fromRuntime = true))
+
+      projectGraphWrapper.clearRuntimeObjects
+      assert(projectGraphWrapper.projectGraph.nodes.isEmpty)
+
+    }
 
   }
+
 }
