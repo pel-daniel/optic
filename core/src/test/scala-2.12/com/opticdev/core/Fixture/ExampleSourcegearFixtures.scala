@@ -90,6 +90,7 @@ object ExampleSourcegearFixtures extends TestBase with GearUtils with ParserUtil
     )
 
     val sourceGear : SourceGear = new SourceGear {
+      override val configHash: String = "test-rig"
       override val parsers: Set[ParserBase] = SourceParserManager.installedParsers
       override val lensSet = new LensSet(routeGear, queryGear, responseGear)
       override val schemas = schemaSet.toSet

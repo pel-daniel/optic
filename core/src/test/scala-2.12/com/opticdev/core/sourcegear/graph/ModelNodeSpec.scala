@@ -18,6 +18,7 @@ class ModelNodeSpec extends AkkaTestFixture("ModelNodeTest") with GearUtils {
   def fixture = new {
     val sourceGear =
     new SourceGear {
+      override val configHash: String = "test-rig"
       override val parsers: Set[ParserBase] = SourceParserManager.installedParsers
       override val lensSet = new LensSet()
       override val schemas = Set()

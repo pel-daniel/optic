@@ -39,6 +39,8 @@ abstract class SourceGear {
 
   val transformationCaller = new TransformationCallerImpl(this)
 
+  val configHash: String
+
   def fileAccumulator = lensSet.fileAccumulator
 
   def isEmpty = parsers.isEmpty && lensSet.listLenses.isEmpty && schemas.isEmpty && schemas.isEmpty
@@ -139,6 +141,7 @@ case object UnloadedSourceGear extends SourceGear {
   override def isLoaded = false
   override val flatContext = FlatContext(None, Map())
   override val connectedProjectGraphs: Set[ProjectGraph] = Set()
+  override val configHash: String = "unloaded-sourcegear"
 }
 
 object SourceGear {
@@ -149,6 +152,7 @@ object SourceGear {
     override val transformations = Set()
     override val flatContext = FlatContext(None, Map())
     override val connectedProjectGraphs: Set[ProjectGraph] = Set()
+    override val configHash: String = "empty-sourcegear"
   }
 
   def unloaded = UnloadedSourceGear

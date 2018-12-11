@@ -29,6 +29,7 @@ class RenderSpec extends TestBase with PrivateMethodTester with GearUtils with P
     val testSchema = OMSchema(testSchemaRef, JsObject.empty)
 
     val sourceGear = new SourceGear {
+      override val configHash: String = "test-rig"
       override val parsers: Set[ParserBase] = Set()
       override val lensSet: LensSet = new LensSet(a, b)
       override val transformations: Set[Transformation] = Set()

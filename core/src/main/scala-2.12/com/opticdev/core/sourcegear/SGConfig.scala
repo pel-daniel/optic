@@ -66,6 +66,7 @@ case class SGConfig(hashInt: Int,
       override val transformations = inflatedTransformations
       override val flatContext: FlatContext = _flatContext
       override val connectedProjectGraphs: Set[ProjectGraph] = connectedGraphs + simulatedGraph
+      override val configHash: String = hashString
     }
   }
 

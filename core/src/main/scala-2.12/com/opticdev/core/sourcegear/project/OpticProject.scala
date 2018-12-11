@@ -16,6 +16,7 @@ import com.opticdev.core.sourcegear.project.config.ProjectFile
 import com.opticdev.core.sourcegear.project.monitoring.{FileStateMonitor, ShouldWatch}
 import com.opticdev.core.sourcegear.project.status.ProjectStatus
 import com.opticdev.core.sourcegear.snapshot.Snapshot
+import com.opticdev.core.sourcegear.storage.ProjectRuntimeObjectStorage
 import com.opticdev.core.sourcegear.sync.{DiffSyncGraph, SyncPatch}
 import net.jcazevedo.moultingyaml.YamlString
 
@@ -70,22 +71,31 @@ abstract class OpticProject(val name: String, val baseDirectory: File)(implicit 
     rereadAll
   }
 
+  var lastSGHash = ""
   def rereadAll = {
     implicit val timeout: akka.util.Timeout = Timeout(5 minutes)
     implicit val sourceGear = projectSourcegear
-    //should delete all
-    ProjectActorSyncAccess.clearGraph(projectActor)
-    ProjectActorSyncAccess.addConnectedProjectSubGraphs(projectActor, sourceGear.connectedProjectGraphs)
-    ParseSupervisorSyncAccess.clearCache()
 
-    projectStatusInstance.firstPassStatus = InProgress
+    if (sourceGear.configHash != lastSGHash && !sourceGear.isEmpty) {
 
-    val futures = filesToWatch.toSeq.map(i=> projectActor ? FileCreated(i, this))
+      //should delete all
+      ProjectActorSyncAccess.clearGraph(projectActor)
+      ProjectActorSyncAccess.addConnectedProjectSubGraphs(projectActor, sourceGear.connectedProjectGraphs)
+      ProjectRuntimeObjectStorage
+        .loadFromStorageAsObjectNodes(name)
+        .foreach(ProjectActorSyncAccess.addConnectedAddRuntimeObjects(projectActor, _))
+      ParseSupervisorSyncAccess.clearCache()
 
-    Future.sequence(futures).onComplete(i=> {
-      projectStatusInstance.firstPassStatus = Complete
-      projectStatusInstance.touch
-    })
+      projectStatusInstance.firstPassStatus = InProgress
+
+      val futures = filesToWatch.toSeq.map(i => projectActor ? FileCreated(i, this))
+
+      Future.sequence(futures).onComplete(i => {
+        projectStatusInstance.firstPassStatus = Complete
+        projectStatusInstance.touch
+      })
+
+    }
   }
 
   val handleFileChange : better.files.FileWatcher.Callback = {

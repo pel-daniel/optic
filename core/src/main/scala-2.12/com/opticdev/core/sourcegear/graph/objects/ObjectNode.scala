@@ -4,7 +4,7 @@ package com.opticdev.core.sourcegear.graph.objects
 import com.opticdev.common.SchemaRef
 import com.opticdev.core.sourcegear.graph.AstProjection
 import com.opticdev.common.graph.BaseNode
-import play.api.libs.json.{JsObject, JsValue}
+import play.api.libs.json.{JsObject, JsValue, Json}
 
 import scala.util.hashing.MurmurHash3
 
@@ -18,4 +18,9 @@ case class ObjectNode(name: String, schemaRef: Option[SchemaRef], value: JsValue
         MurmurHash3.stringHash(value.toString()))
   }
 
+}
+
+object ObjectNode {
+  import com.opticdev.core.sourcegear.project.config.options.ConfigYamlProtocol.SchemaRefFormat
+  implicit val objectNodeFormats = Json.format[ObjectNode]
 }

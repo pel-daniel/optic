@@ -12,6 +12,7 @@ import com.opticdev.common.storage.DataDirectory
 import com.opticdev.common.{BuildInfo, SchemaRef}
 import com.opticdev.core.sourcegear.project.ProjectInfo
 import com.opticdev.core.sourcegear.project.status.{ImmutableProjectStatus, NotLoaded, ProjectStatus}
+import com.opticdev.core.sourcegear.storage.ProjectRuntimeObjectStorage
 import com.opticdev.server.http.HTTPResponse
 import com.opticdev.server.http.routes.RuntimeProtocol._
 import com.opticdev.server.state.ProjectsManager
@@ -80,8 +81,9 @@ class ProjectRoute(implicit executionContext: ExecutionContext, projectsManager:
         entity(as[AddObject]) { addObject =>
           val project = projectsManager.lookupProject(addObject.projectName).map(projectsManager.loadProject)
           if (project.isSuccess) {
-            project.get.projectGraphWrapper.addRuntimeObject(addObject.toObjectNode)
-            println(addObject)
+            val objectNode = addObject.toObjectNode
+            project.get.projectGraphWrapper.addRuntimeObject(objectNode) //saves to memory
+            ProjectRuntimeObjectStorage.addToStorage(objectNode, addObject.projectName) //adds to cache file
             complete(StatusCodes.OK, "Added")
           } else {
             complete(StatusCodes.NotFound, "Project Not Found")
@@ -92,7 +94,8 @@ class ProjectRoute(implicit executionContext: ExecutionContext, projectsManager:
         entity(as[ClearRuntimeObjects]) { clearRuntime =>
           val project = projectsManager.lookupProject(clearRuntime.projectName).map(projectsManager.loadProject)
           if (project.isSuccess) {
-            project.get.projectGraphWrapper.clearRuntimeObjects
+            project.get.projectGraphWrapper.clearRuntimeObjects //clears memory
+            ProjectRuntimeObjectStorage.clearStorage(clearRuntime.projectName) //clears cache file
             complete(StatusCodes.OK, "Added")
           } else {
             complete(StatusCodes.NotFound, "Project Not Found")

@@ -20,6 +20,7 @@ import play.api.libs.json._
 class ParserGearSpec extends AkkaTestFixture("ParserGearTest") with ParserUtils {
 
   implicit val sourceGear = new SourceGear {
+    override val configHash: String = "test-rig"
     override val parsers: Set[ParserBase] = SourceParserManager.installedParsers
     override val lensSet = new LensSet()
     override val schemas = Set()
