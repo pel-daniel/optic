@@ -78,18 +78,19 @@ class ProjectRoute(implicit executionContext: ExecutionContext, projectsManager:
     post {
       path("objects") {
         entity(as[AddObject]) { addObject =>
-          val project = projectsManager.lookupProject(addObject.projectName)
+          val project = projectsManager.lookupProject(addObject.projectName).map(projectsManager.loadProject)
           if (project.isSuccess) {
             project.get.projectGraphWrapper.addRuntimeObject(addObject.toObjectNode)
+            println(addObject)
             complete(StatusCodes.OK, "Added")
           } else {
             complete(StatusCodes.NotFound, "Project Not Found")
           }
         }
-      }
+      } ~
       path("clear-objects") {
         entity(as[ClearRuntimeObjects]) { clearRuntime =>
-          val project = projectsManager.lookupProject(clearRuntime.projectName)
+          val project = projectsManager.lookupProject(clearRuntime.projectName).map(projectsManager.loadProject)
           if (project.isSuccess) {
             project.get.projectGraphWrapper.clearRuntimeObjects
             complete(StatusCodes.OK, "Added")
