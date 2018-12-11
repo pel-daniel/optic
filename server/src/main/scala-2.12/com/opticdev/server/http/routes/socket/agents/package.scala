@@ -3,7 +3,7 @@ package com.opticdev.server.http.routes.socket
 import akka.actor.ActorRef
 import better.files.{File, Files}
 import com.opticdev.arrow.changes.{ChangeGroup, JsonImplicits}
-import com.opticdev.common.SchemaRef
+import com.opticdev.common.{SchemaRef, VersionlessSchemaRef}
 import com.opticdev.core.sourcegear.graph.{NamedFile, NamedModel}
 import com.opticdev.core.sourcegear.project.status.ImmutableProjectStatus
 import com.opticdev.core.sourcegear.sync.SyncPatch
@@ -22,6 +22,7 @@ package object agents {
     case class Registered(actor: ActorRef) extends AgentEvents
     case object Terminated extends AgentEvents
     case class UnknownEvent(raw: String) extends AgentEvents
+    case class CollectAll(schema: VersionlessSchemaRef) extends AgentEvents
     case class Pong() extends AgentEvents
 
     case class PutUpdate(id: String, newValue: JsObject, editorSlug: Option[String]) extends AgentEvents
@@ -132,6 +133,13 @@ package object agents {
     override def asJson: JsValue = JsObject(Seq(
       "event"-> JsString("sync-staged"),
       "patch" -> syncPatch.asJson(editorSlug)
+    ))
+  }
+
+  case class CollectAllResults(results: Vector[(Option[String], JsValue)])(implicit val projectDirectory: String) extends OpticEvent with UpdateAgentEvent {
+    override def asJson: JsValue = JsObject(Seq(
+      "event"-> JsString("collect-all-results"),
+      "results" -> JsArray(results.map(i=> JsObject(Seq("name" -> i._1.map(JsString).getOrElse(JsNull), "value" -> i._2 ))))
     ))
   }
 

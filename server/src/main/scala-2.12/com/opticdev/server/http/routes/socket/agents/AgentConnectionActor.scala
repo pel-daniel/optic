@@ -2,6 +2,10 @@ package com.opticdev.server.http.routes.socket.agents
 
 import akka.actor.{Actor, ActorRef, Status}
 import com.opticdev.arrow.changes.evaluation.BatchedChanges
+import com.opticdev.core.sourcegear.SGContext
+import com.opticdev.core.sourcegear.actors.ParseSupervisorSyncAccess
+import com.opticdev.core.sourcegear.graph.model.{BaseModelNode, ModelNode}
+import com.opticdev.core.sourcegear.graph.objects.ObjectNode
 import com.opticdev.core.sourcegear.sync.SyncPatch
 import com.opticdev.server.http.controllers.{ArrowPostChanges, ArrowTransformationOptions, ArrowTransformationOptionsQuery, PutUpdateRequest}
 import com.opticdev.server.http.routes.socket.ErrorResponse
@@ -104,6 +108,24 @@ class AgentConnectionActor(implicit projectDirectory: String, projectsManager: P
         }
 
         }
+    }
+
+    case CollectAll(versionlessSchemaRef) => {
+      val project = projectsManager.projectForDirectory(projectDirectory)
+      val allMatchingNodes = project.projectGraphWrapper.query {
+        case n if n.value.isModel && n.value.asInstanceOf[ModelNode].schemaId.matchesVersionless(versionlessSchemaRef) => true
+        case n if n.value.isConstantObject && n.value.asInstanceOf[ObjectNode].schemaRef.exists(_.matchesVersionless(versionlessSchemaRef)) => true
+        case _ => false
+      }.toVector
+
+      val results = allMatchingNodes.map {
+        case bmn: BaseModelNode => {
+          (bmn.objectRef.map(_.name), bmn.expandedValue()(SGContext.forModelNode(bmn)(project.actorCluster, project).get))
+        }
+        case on: ObjectNode => (Some(on.name), on.value)
+      }
+
+      AgentConnection.broadcastUpdate(CollectAllResults(results))
     }
 
     case updateAgentEvent: UpdateAgentEvent => {

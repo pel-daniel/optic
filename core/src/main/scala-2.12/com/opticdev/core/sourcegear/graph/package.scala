@@ -12,7 +12,7 @@ package object graph {
   trait AstProjection extends BaseNode {
     val id : String = null
     def isModel : Boolean = this.isInstanceOf[BaseModelNode]
-    def isObject : Boolean = this.isInstanceOf[ObjectNode]
+    def isConstantObject : Boolean = this.isInstanceOf[ObjectNode]
   }
 
   type ProjectGraph = Graph[AstProjection, LkDiEdge]

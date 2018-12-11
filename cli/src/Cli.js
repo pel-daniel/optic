@@ -23,6 +23,7 @@ import updateNotifier from 'update-notifier'
 import {jreName} from './jre/jre-install'
 import fs from 'fs'
 import {initStorage} from "./Storage";
+import {listCmd} from "./commands/control/list";
 
 const storage = initStorage()
 
@@ -44,6 +45,7 @@ commands.attachCommand(startCmd)
 commands.attachCommand(stopCmd)
 commands.attachCommand(installPluginsCmd, true)
 commands.attachCommand(refreshCmd)
+commands.attachCommand(listCmd)
 // commands.attachCommand(createuserCmd)
 // commands.attachCommand(adduserCmd)
 

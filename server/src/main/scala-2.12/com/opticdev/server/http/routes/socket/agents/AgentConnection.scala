@@ -7,7 +7,7 @@ import akka.stream.scaladsl.{Flow, Sink, Source}
 import akka.util.Timeout
 import better.files.File
 import com.opticdev.arrow.changes.ChangeGroup
-import com.opticdev.common.SchemaRef
+import com.opticdev.common.{SchemaRef, VersionlessSchemaRef}
 import com.opticdev.sdk.descriptions.transformation.TransformationRef
 import com.opticdev.server.http.routes.socket._
 import play.api.libs.json.{JsNumber, JsObject, JsString, Json}
@@ -73,6 +73,16 @@ class AgentConnection(projectDirectory: String, actorSystem: ActorSystem)(implic
                 val editorSlugTry = Try( (parsedTry.get \ "editorSlug").get.as[JsString].value )
                 if (editorSlugTry.isSuccess) {
                   StageSync(editorSlugTry.get)
+                } else {
+                  UnknownEvent(i)
+                }
+              }
+
+              case "collect-all" => {
+                val schema = Try( (parsedTry.get \ "schema").get.as[JsString].value )
+                val versionlessSchema = schema.map(VersionlessSchemaRef)
+                if (versionlessSchema.isSuccess) {
+                  CollectAll(versionlessSchema.get)
                 } else {
                   UnknownEvent(i)
                 }

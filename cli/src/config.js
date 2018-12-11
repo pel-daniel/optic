@@ -12,7 +12,7 @@ module.exports = (() => {
 			},
 			storageDirectory: process.cwd()+'/.optic-storage',
 			jreDirectory,
-			projectDirectory: '/Users/aidancunniffe/Desktop/optic-demo-project-master'
+			projectDirectory: '/Users/aidancunniffe/Desktop/time-tracker'
 		}
 	} else {
 

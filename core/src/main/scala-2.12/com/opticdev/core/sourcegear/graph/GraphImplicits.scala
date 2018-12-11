@@ -105,7 +105,7 @@ object GraphImplicits {
 
     def objectByName(name: String): Option[(AstProjection, SGContext => JsValue)] = {
       graph.nodes.collectFirst { //@todo no good way to handle duplicate names with this approach
-        case i if i.value.isObject && i.value.asInstanceOf[ObjectNode].name == name => {
+        case i if i.value.isConstantObject && i.value.asInstanceOf[ObjectNode].name == name => {
           (i.value, (context: SGContext) => i.value.asInstanceOf[ObjectNode].value)
         }
         case i if i.value.isModel && i.value.asInstanceOf[BaseModelNode].objectRef.exists(_.name == name) => {

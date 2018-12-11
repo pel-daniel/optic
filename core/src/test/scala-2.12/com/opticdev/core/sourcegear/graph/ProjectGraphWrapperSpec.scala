@@ -82,7 +82,7 @@ class ProjectGraphWrapperSpec extends AkkaTestFixture("ProjectGraphWrapperTest")
       assert(projectGraphWrapper.projectGraph.nodes.size == 2)
 
       assert(projectGraphWrapper.projectGraph.nodes
-        .collectFirst{ case a if a.value.isObject => a.value.asInstanceOf[ObjectNode].value}.contains(JsString("Hello Goodbye")))
+        .collectFirst{ case a if a.value.isConstantObject => a.value.asInstanceOf[ObjectNode].value}.contains(JsString("Hello Goodbye")))
     }
 
     it("can remove all runtime objects") {

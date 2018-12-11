@@ -130,7 +130,7 @@ class ProjectGraphWrapper(val projectGraph: ProjectGraph)(implicit val project: 
       case n if n.value.isModel && n.value.asInstanceOf[BaseModelNode].objectRef.isDefined =>
         val asBaseModelNode = n.value.asInstanceOf[BaseModelNode]
         NamedModel(asBaseModelNode.objectRef.get.name, Some(asBaseModelNode.schemaId.internalFull), asBaseModelNode.id)
-      case n if n.value.isObject =>
+      case n if n.value.isConstantObject =>
         val objectNode = n.value.asInstanceOf[ObjectNode]
         NamedModel(objectNode.name, objectNode.schemaRef.map(_.internalFull), objectNode.id)
     }.toSet
@@ -164,7 +164,7 @@ class ProjectGraphWrapper(val projectGraph: ProjectGraph)(implicit val project: 
       val projectNode = existingProjectGraph.get
       Try { //delete any nodes with same name
         projectGraph.allSuccessorsOf(projectNode).toVector.collectFirst {
-          case a if a.isObject && a.asInstanceOf[ObjectNode].name == objectNode.name => a.asInstanceOf[ObjectNode]
+          case a if a.isConstantObject && a.asInstanceOf[ObjectNode].name == objectNode.name => a.asInstanceOf[ObjectNode]
         }.foreach(projectGraph.remove)
       }
 

@@ -13,6 +13,10 @@ case class SchemaRef(packageRef: Option[PackageRef], id: String) {
       this.id == schemaRef.id
   }
 
+  def matchesVersionless(versionlessSchemaRef: VersionlessSchemaRef) = {
+    this.packageRef.map(_.packageId).contains(versionlessSchemaRef.packageId) && this.id == versionlessSchemaRef.id
+  }
+
   def withPackageIfMissing(p: PackageRef) : SchemaRef = {
     if (packageRef.isEmpty) {
       this.copy(packageRef = Some(p))
@@ -21,6 +25,12 @@ case class SchemaRef(packageRef: Option[PackageRef], id: String) {
     }
   }
 
+}
+
+case class VersionlessSchemaRef(idFull: String) {
+  require(idFull.contains("/"))
+  val packageId: String = idFull.split("/").head
+  val id: String = idFull.split("/").last
 }
 
 object SchemaRef {

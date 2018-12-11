@@ -47,7 +47,7 @@ object SyncGraph {
     def node: BaseNode = modelNode
   }
   case class NamedObjectNode(objectNode: ObjectNode) extends NamedSyncGraphNode {
-    override def isObject: Boolean = true
+    override def isConstantObject: Boolean = true
     def schema: SchemaRef = objectNode.schemaRef.get
     def name = Some(objectNode.name)
     def node: BaseNode = objectNode
@@ -72,7 +72,7 @@ object SyncGraph {
     val pgDefinesNames: mutable.Set[BaseModelNode] = projectGraph.nodes.collect { case i if hasName(i) && !i.value.asInstanceOf[BaseModelNode].internal => i.value.asInstanceOf[BaseModelNode]}
     val pgDefinesSources: mutable.Set[BaseModelNode] = projectGraph.nodes.collect { case i if hasSource(i) && !i.value.asInstanceOf[BaseModelNode].internal => i.value.asInstanceOf[BaseModelNode]}
 
-    val allObjects = projectGraph.nodes.collect {case obj if obj.isObject => NamedObjectNode(obj.value.asInstanceOf[ObjectNode])}
+    val allObjects = projectGraph.nodes.collect {case obj if obj.isConstantObject => NamedObjectNode(obj.value.asInstanceOf[ObjectNode])}
 
     val allNames: mutable.Set[NamedModelNode] = {
       val an = pgDefinesNames.map(i=> NamedModelNode(i))
