@@ -22,7 +22,7 @@ import scala.util.{Failure, Success, Try}
 
 class ContextQuery(file: File, range: Range, contentsOption: Option[String], editorSlug: String)(implicit projectsManager: ProjectsManager) {
 
-  case class ContextQueryResults(modelNodes: Vector[ExpandedModelNode], availableTransformations: Vector[Result], project: OpticProject, editorSlug: String)
+  case class ContextQueryResults(modelNodes: Vector[ExpandedModelNode], availableTransformations: Vector[Result], project: OpticProject, line: Option[Int], editorSlug: String)
 
   def execute : Future[ContextQueryResults] = {
 
@@ -73,18 +73,20 @@ class ContextQuery(file: File, range: Range, contentsOption: Option[String], edi
       }
     }
 
-    def addTransformationsAndFinalize(modelResults: Vector[ExpandedModelNode]): Future[ContextQueryResults] = Future {
+    def addTransformationsAndFinalize(modelResults: Vector[ExpandedModelNode], line: Option[Int] = None): Future[ContextQueryResults] = Future {
       val modelContext = ModelContext(file, range, modelResults.map(_.flatten))
       val arrow = projectsManager.lookupArrow(projectOption.get).get
-      ContextQueryResults(modelResults, arrow.transformationsForContext(modelContext, editorSlug), projectOption.get, editorSlug)
+      ContextQueryResults(modelResults, arrow.transformationsForContext(modelContext, editorSlug), projectOption.get, line, editorSlug)
     }
 
     if (contentsOption.isDefined && projectOption.isSuccess) {
+      import com.opticdev.common.utils.RangeToLine._
+      val lineRange = range.toLineRange(contentsOption.get)
       projectOption.get.stageFileContents(file, contentsOption.get, fromContextQuery = true)
         .flatMap(i=> query)
-        .flatMap(i=> addTransformationsAndFinalize(i))
+        .flatMap(i=> addTransformationsAndFinalize(i, Some(lineRange.start)))
     } else {
-      query.map(addTransformationsAndFinalize).flatten
+      query.map(i=> addTransformationsAndFinalize(i, None)).flatten
     }
 
   }

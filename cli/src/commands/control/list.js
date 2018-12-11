@@ -2,8 +2,7 @@ import colors from 'colors'
 import request from "request";
 import {track} from "../../Analytics";
 import Colors from 'colors'
-import {agentConnection} from "../../optic/AgentSocket";
-import {shouldStart} from "../../interactive/Interactive";
+import {agentConnection, shouldStart} from "../../optic/AgentSocket";
 
 export const listCmd = {
 	name: 'list',
@@ -14,16 +13,12 @@ export const listCmd = {
 	action: (cmd) => {
 		const type = cmd.args[0].type
 		if (type) {
-			shouldStart().then(() => {
-				agentConnection().actions.collectAll(type)
+			agentConnection().actions.collectAll(type)
 
-				agentConnection().onCollectAllResults((data) => {
-					console.log(JSON.stringify(data.results, null, 4))
-					process.exit(0)
-				})
-
+			agentConnection().onCollectAllResults((data) => {
+				console.log(JSON.stringify(data.results, null, 4))
+				process.exit(0)
 			})
-
 		} else {
 			console.log(Colors.red('Type required for list command. Try "list --type <schema-type>" '))
 		}

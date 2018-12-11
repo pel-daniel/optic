@@ -1,6 +1,6 @@
 import "regenerator-runtime/runtime";
 import path from 'path'
-const isDev = false
+const isDev = true
 
 const jreDirectory = require('os').homedir()+'/.optic-jre'
 

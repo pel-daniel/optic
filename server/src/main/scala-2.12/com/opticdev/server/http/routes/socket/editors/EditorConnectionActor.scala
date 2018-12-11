@@ -37,7 +37,9 @@ class EditorConnectionActor(slug: String, autorefreshes: Boolean, projectsManage
 
         implicit val projectDirectory = i.project.projectDirectory
 
-        val contextFound = ContextFound(file, i.project.trimAbsoluteFilePath(file), range, i.project.name, i.editorSlug, JsObject(Seq(
+        import com.opticdev.common.utils.RangeToLine._
+
+        val contextFound = ContextFound(file, i.project.trimAbsoluteFilePath(file), range, i.line, i.project.name, i.editorSlug, JsObject(Seq(
           "models" -> JsArray(i.modelNodes.map(_.asJson()(projectsManager))),
           "transformations" -> JsArray(i.availableTransformations.map(_.asJson))
         )))

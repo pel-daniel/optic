@@ -1,6 +1,7 @@
 import {AgentConnection} from "optic-editor-sdk";
 import config from '../config'
 import colors from 'colors'
+
 let _agentConnection = null
 
 export function agentConnection(connectCallback) {
@@ -17,4 +18,26 @@ export function agentConnection(connectCallback) {
 	}
 
 	return _agentConnection
+}
+
+export function shouldStart() {
+	return new Promise((resolve, reject) => {
+		const agentC = agentConnection(() => {
+			resolve()
+		})
+
+		agentC.onError((e) => {
+			console.error(colors.red(`Current directory does not include Optic project. Run 'optic init' to create one`))
+			process.exit(0)
+		})
+	})
+}
+
+export function catchProjectErrors() {
+	agentConnection().onStatusChange(({status}) => {
+		if (status.hasErrors) {
+			console.log(colors.red('Optic Project Error: \n\n'+ status.errors.join('\n')))
+			process.exit(1)
+		}
+	})
 }
