@@ -33,6 +33,7 @@ class ProjectSpec extends AkkaTestFixture("ProjectTest") with GearUtils with Eve
   }
 
   override implicit val sourceGear : SourceGear = new SourceGear {
+    override val configHash: String = "test-rig"
     override val parsers: Set[ParserBase] = SourceParserManager.installedParsers
     override val lensSet = new LensSet()
     override val schemas = Set()

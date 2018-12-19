@@ -13,6 +13,7 @@ object DataDirectory {
   val sourcegear = PlatformConstants.dataDirectory / "sourcegear"
   val trainerScratch = PlatformConstants.dataDirectory / "trainer-scratch"
   val projectGraphs = PlatformConstants.dataDirectory / "project-graphs"
+  val runtimeObjects = PlatformConstants.dataDirectory / "runtime-objects"
 
   def hasValidStructure = {
     root.isDirectory &&
@@ -22,7 +23,8 @@ object DataDirectory {
       compiled.isDirectory &&
       sourcegear.isDirectory &&
       trainerScratch.isDirectory &&
-      projectGraphs.isDirectory
+      projectGraphs.isDirectory &&
+      runtimeObjects.isDirectory
   }
 
   def buildDirectoryStructure = {
@@ -34,6 +36,7 @@ object DataDirectory {
     sourcegear.createIfNotExists(asDirectory = true)
     trainerScratch.createIfNotExists(asDirectory = true)
     projectGraphs.createIfNotExists(asDirectory = true)
+    runtimeObjects.createIfNotExists(asDirectory = true)
   }
 
   def delete = root.delete(true)

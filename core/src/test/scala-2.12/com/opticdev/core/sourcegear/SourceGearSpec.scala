@@ -11,6 +11,7 @@ import com.opticdev.parsers.{ParserBase, SourceParserManager}
 class SourceGearSpec extends AkkaTestFixture("SourceGearTest") with GearUtils {
 
   override val sourceGear = new SourceGear {
+    override val configHash: String = "test-rig"
     override val parsers: Set[ParserBase] = SourceParserManager.installedParsers
     override val lensSet = new LensSet()
     override val schemas = Set()

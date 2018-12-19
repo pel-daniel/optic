@@ -25,6 +25,7 @@ object ExampleSourcegears {
     val transformationPackage = PackageRef("optic:test-transform")
 
     val sourceGear = new SourceGear {
+      override val configHash: String = "test-rig"
       override val parsers = Set()
       override val lensSet = new LensSet()
       override val schemas = Set(schemaModel, schemaRoute, schemaForm, schemaFetch)

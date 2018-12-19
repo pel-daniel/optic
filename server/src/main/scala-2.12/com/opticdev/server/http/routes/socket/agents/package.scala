@@ -38,7 +38,7 @@ package object agents {
       val projectDirectory: String
     }
 
-    case class ContextFound(filePath: String, relativeFilePath: String, range: Range, projectName: String, editorSlug: String, results: JsValue, isError: Boolean = false)(implicit val projectDirectory: String) extends OpticEvent with UpdateAgentEvent {
+    case class ContextFound(filePath: String, relativeFilePath: String, range: Range, line: Option[Int], projectName: String, editorSlug: String, results: JsValue, isError: Boolean = false)(implicit val projectDirectory: String) extends OpticEvent with UpdateAgentEvent {
       def asJson = JsObject(Seq(
         "event"-> JsString("context-found"),
         "projectName"-> JsString(projectName),
@@ -46,6 +46,7 @@ package object agents {
         "filePath" -> JsString(filePath),
         "relativeFilePath" -> JsString(relativeFilePath),
         "range" -> range.toJson,
+        "line" -> (if (line.isDefined) JsNumber(line.get) else JsNull),
         (if (isError) "errors" else "results") -> results)
       )
     }

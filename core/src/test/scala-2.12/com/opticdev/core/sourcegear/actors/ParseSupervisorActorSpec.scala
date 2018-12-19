@@ -26,6 +26,7 @@ class ParseSupervisorActorSpec extends AkkaTestFixture("ParseSupervisorActorTest
     override val transformations = Set()
     override val flatContext: FlatContext = FlatContext(None, Map.empty)
     override val connectedProjectGraphs: Set[ProjectGraph] = Set()
+    override val configHash: String = "test-rig"
   }
 
   describe("context lookup") {

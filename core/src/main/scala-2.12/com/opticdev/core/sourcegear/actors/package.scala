@@ -6,6 +6,7 @@ import com.opticdev.common.graph.AstGraph
 import com.opticdev.core.sourcegear.actors.ParseSupervisorActor
 import com.opticdev.core.actorSystem
 import com.opticdev.core.sourcegear.annotations.FileNameAnnotation
+import com.opticdev.core.sourcegear.graph.objects.ObjectNode
 import com.opticdev.core.sourcegear.graph.{FileNode, ProjectGraph}
 import com.opticdev.core.sourcegear.imports.FileImportsRegistry
 import com.opticdev.core.sourcegear.project.{Project, ProjectBase}
@@ -46,6 +47,7 @@ package object actors {
   case class SetCurrentGraph(projectGraph: ProjectGraph)
   case object ClearGraph
   case class AddConnectedProjectSubGraphs(subGraphs: Set[ProjectGraph])
+  case class AddRuntimeObjects(runtimeObjects: Vector[ObjectNode])
   case class GetContext(file: File)(implicit val sourceGear: SourceGear, val project: ProjectBase)
   case class NodeForId(id: String)
   case class GetSnapshot(sourceGear: SourceGear, project: ProjectBase)

@@ -13,7 +13,6 @@ import {createuserCmd} from "./commands/control/createuser";
 import {adduserCmd} from "./commands/control/adduser";
 import {syncCmd} from "./commands/optic/sync";
 import {serverStatus} from "./optic/IsRunning";
-import {startInteractive} from "./interactive/Interactive";
 import {searchCmd} from "./commands/optic/search";
 import "regenerator-runtime/runtime";
 import {setupFlow} from "./commands/SetupFlow";
@@ -24,6 +23,7 @@ import {jreName} from './jre/jre-install'
 import fs from 'fs'
 import {initStorage} from "./Storage";
 import {listCmd} from "./commands/control/list";
+import {inspectCmd} from "./commands/control/inspect";
 
 const storage = initStorage()
 
@@ -45,9 +45,8 @@ commands.attachCommand(startCmd)
 commands.attachCommand(stopCmd)
 commands.attachCommand(installPluginsCmd, true)
 commands.attachCommand(refreshCmd)
-commands.attachCommand(listCmd)
-// commands.attachCommand(createuserCmd)
-// commands.attachCommand(adduserCmd)
+commands.attachCommand(listCmd, true, true)
+commands.attachCommand(inspectCmd, true, true)
 
 export const standardHelp = () => program.helpInformation()
 
@@ -74,15 +73,7 @@ async function processInput() {
 	} else {
 		if (!process.argv.slice(2).length) {
 			//start interactive CLI if just 'optic' is passed
-			const p = startCmd.action(false, false)
-			p.then(() => {
-				const {startInteractive} = require('./interactive/Interactive')
-				startInteractive({})
-			})
-
-			p.catch(() => {
-				console.log(colors.red('Could not start server, unknown error'))
-			})
+			console.log(standardHelp())
 		} else {
 			program.parse(process.argv)
 		}

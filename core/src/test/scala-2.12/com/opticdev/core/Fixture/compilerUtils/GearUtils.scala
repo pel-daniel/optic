@@ -22,6 +22,7 @@ import scala.io.Source
 trait GearUtils {
 
   implicit val sourceGear = new SourceGear {
+    override val configHash: String = "test-rig"
     override val parsers: Set[ParserBase] = SourceParserManager.installedParsers
     override val lensSet = new LensSet()
     override val schemas = Set()
@@ -93,6 +94,7 @@ trait GearUtils {
     val g = (lenses ++ schemas).toMap
 
     new SourceGear {
+      override val configHash: String = "test-rig"
       override val parsers: Set[ParserBase] = SourceParserManager.installedParsers
       override val lensSet = outerLensSet
       override val schemas = compiled.schemas

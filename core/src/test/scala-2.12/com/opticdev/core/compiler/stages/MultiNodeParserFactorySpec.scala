@@ -80,6 +80,7 @@ class MultiNodeParserFactorySpec extends TestBase with ParserUtils with GearUtil
 
 
     implicit val sourcegear = new SourceGear {
+      override val configHash: String = "test-rig"
       override val parsers: Set[ParserBase] = SourceParserManager.installedParsers
       override val transformations: Set[Transformation] = Set()
       override val flatContext: FlatContext = FlatContext(None, Map())
@@ -125,6 +126,7 @@ class MultiNodeParserFactorySpec extends TestBase with ParserUtils with GearUtil
     lazy val importSG = sourceGearFromDescription("test-examples/resources/example_packages/optic:ImportExample@0.1.0.json")
 
     lazy implicit val sourcegear = new SourceGear {
+      override val configHash: String = "test-rig"
       override val parsers: Set[ParserBase] = SourceParserManager.installedParsers
       override val transformations: Set[Transformation] = Set()
       override val flatContext: FlatContext = FlatContext(None, Map(
@@ -330,6 +332,7 @@ class MultiNodeParserFactorySpec extends TestBase with ParserUtils with GearUtil
     lazy val multiNodeLens = new MultiNodeParserFactoryStage(f.snippetOutput).run.multiNodeLens
 
     lazy implicit val sourcegear = new SourceGear {
+      override val configHash: String = "test-rig"
       override val parsers: Set[ParserBase] = SourceParserManager.installedParsers
       override val transformations: Set[Transformation] = Set()
       override val flatContext: FlatContext = FlatContext(None, Map(

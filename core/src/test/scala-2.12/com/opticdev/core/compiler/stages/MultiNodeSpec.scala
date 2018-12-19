@@ -55,6 +55,7 @@ object MultiNodeFixture extends GearUtils {
     lazy val multiNodeLens = new MultiNodeParserFactoryStage(f.snippetOutput).run.multiNodeLens
 
     lazy implicit val sourcegear = new SourceGear {
+      override val configHash: String = "test-rig"
       override val parsers: Set[ParserBase] = SourceParserManager.installedParsers
       override val transformations: Set[Transformation] = syncTestSourceGear.transformations
       override val flatContext: FlatContext = FlatContext(None, Map(

@@ -4,11 +4,11 @@ import akka.actor.{Actor, ActorRef, Props}
 import akka.actor.Actor.Receive
 import com.opticdev.core.sourcegear.graph.{AstProjection, ProjectGraph, ProjectGraphWrapper}
 
-
 import scala.concurrent.Await
 import akka.pattern.ask
 import akka.util.Timeout
 import com.opticdev.core.sourcegear.ParseCache
+import com.opticdev.core.sourcegear.graph.objects.ObjectNode
 import com.opticdev.core.sourcegear.project.status.SyncStatus
 import com.opticdev.core.sourcegear.snapshot.Snapshot
 import com.opticdev.core.sourcegear.sync.DiffSyncGraph
@@ -58,6 +58,11 @@ class ProjectActor(initialGraph: ProjectGraphWrapper)(implicit logToCli: Boolean
       context.become(active(graph))
       sender ! graph
     }
+    case AddRuntimeObjects(objects) => {
+      objects.foreach(graph.addRuntimeObject)
+      context.become(active(graph))
+      sender ! graph
+    }
     case NodeForId(id) => sender ! graph.nodeForId(id)
     case GetSnapshot(sg, project) => sender ! Snapshot.forSourceGearAndProjectGraph(sg, graph.projectGraph, project.actorCluster.parserSupervisorRef, project)
 
@@ -82,6 +87,10 @@ object ProjectActorSyncAccess {
 
   def addConnectedProjectSubGraphs(projectActor: ActorRef, connectedProjectGraphs: Set[ProjectGraph]): Future[ProjectGraphWrapper] = {
     (projectActor ? AddConnectedProjectSubGraphs(connectedProjectGraphs)).asInstanceOf[Future[ProjectGraphWrapper]]
+  }
+
+  def addConnectedAddRuntimeObjects(projectActor: ActorRef, objects: Vector[ObjectNode]): Future[ProjectGraphWrapper] = {
+    (projectActor ? AddRuntimeObjects(objects)).asInstanceOf[Future[ProjectGraphWrapper]]
   }
 }
 

@@ -98,6 +98,7 @@ class RendererFactoryStageSpec extends AkkaTestFixture("RendererFactoryStageSpec
     val b = OMSchema(SchemaRef(Some(PackageRef("optic:test", "0.1.1")), "a"), JsObject.empty)
 
     val sourceGear : SourceGear = new SourceGear {
+      override val configHash: String = "test-rig"
       override val parsers: Set[ParserBase] = SourceParserManager.installedParsers
       override val lensSet = new LensSet(thisGear, childGear)
       override val schemas = Set(a,b)
