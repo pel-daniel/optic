@@ -1,0 +1,62 @@
+package com.opticdev.common.api_types
+
+import com.opticdev.common.api.ApiSpecificationComponent
+import play.api.libs.json.{JsObject, JsResult, JsValue, Json}
+
+case class Endpoint(method: String,
+                    url: String,
+                    parameters: Vector[Parameter] = Vector(),
+                    body: Option[RequestBody] = None,
+                    responses: Vector[Response] = Vector(),
+                    name: Option[String] = None) extends ApiSpecificationComponent {
+
+  require(EndpointValidation.allowedMethods.contains(method),
+    s"Invalid HTTP Method ${method} is not one of ${EndpointValidation.allowedMethods.mkString(", ")}")
+
+  def identifier: String = s"${method} ${url}"
+
+  override def issues: Vector[ApiIssue] = {
+    (if (responses.isEmpty) Vector(NoResponses(identifier)) else Vector()) ++
+    (if (body.isDefined) body.get.issues else Vector()) ++
+    parameters.flatMap(_.issues) ++
+    responses.flatMap(_.issues)
+  }
+}
+
+case class Parameter(in: String, name: String, required: Boolean = false, schema: Option[JsObject]) extends ApiSpecificationComponent {
+  override def issues: Vector[ApiIssue] = Vector()
+  def identifier: String = s"${in}.${name}"
+}
+
+case class RequestBody(`content-type`: Option[String], schema: Option[JsObject]) extends ApiSpecificationComponent {
+  override def issues: Vector[ApiIssue] = {
+    (if (schema.isEmpty) Vector(RequestBodyWithoutSchema(identifier)) else Vector()) ++
+    (if (schema.nonEmpty && `content-type`.isEmpty) Vector(RequestBodyWithoutContentType(identifier)) else Vector())
+  }
+  def identifier: String = s"body"
+}
+
+case class Response(status: Int, `content-type`: Option[String], schema: Option[JsObject]) extends ApiSpecificationComponent {
+  override def issues: Vector[ApiIssue] = {
+    (if (schema.isEmpty) Vector(ResponseBodyWithoutSchema(identifier)) else Vector()) ++
+    (if (schema.nonEmpty && `content-type`.isEmpty) Vector(ResponseBodyWithoutContentType(identifier)) else Vector())
+  }
+
+  override def identifier: String = status.toString
+}
+
+
+object EndpointValidation {
+  val allowedMethods = Set("get", "post", "put", "delete", "options", "head")
+}
+
+object Endpoint {
+  implicit val responsesFormats = Json.using[Json.WithDefaultValues].format[Response]
+  implicit val parameterFormats = Json.using[Json.WithDefaultValues].format[Parameter]
+  implicit val requestBodyFormats = Json.using[Json.WithDefaultValues].format[RequestBody]
+  implicit val endpointFormats = Json.using[Json.WithDefaultValues].format[Endpoint]
+
+  def fromJson(jsValue: JsValue, nameOption: Option[String]): JsResult[Endpoint] =
+    Json.fromJson[Endpoint](jsValue)
+        .map(_.copy(name = nameOption))
+}
