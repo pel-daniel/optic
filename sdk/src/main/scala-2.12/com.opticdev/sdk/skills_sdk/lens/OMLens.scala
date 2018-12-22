@@ -25,6 +25,12 @@ case class OMLens(name: Option[String],
                   internal: Boolean = false
                  ) extends PackageExportable {
 
+  require({
+    val runtimeComponents = runtimeFieldComponentsCompilerInput
+    val distinctExpressions = runtimeComponents.map(_.component.tokenAt).distinct
+    runtimeComponents.size == distinctExpressions.size
+  }, "Invalid OMLens. Runtime components must rely on unique expressions")
+
   def variablesCompilerInput: Vector[OMVariable] = variables.map(i=> OMVariable(i._1, i._2)).toVector
 
   def subcontainerCompilerInputs: Vector[OMSubContainer] = containers.map(i=> {
@@ -73,6 +79,14 @@ case class OMLens(name: Option[String],
   def computedFieldComponentsCompilerInput: Vector[OMComponentWithPropertyPath[OMLensComputedFieldComponent]] = {
     value.collect {
       case (k:String, v: OMLensComputedFieldComponent) => {
+        OMComponentWithPropertyPath(Seq(k), v)
+      }
+    }.toVector
+  }
+
+  def runtimeFieldComponentsCompilerInput: Vector[OMComponentWithPropertyPath[OMLensRuntimeComponent]] = {
+    value.collect {
+      case (k:String, v: OMLensRuntimeComponent) => {
         OMComponentWithPropertyPath(Seq(k), v)
       }
     }.toVector

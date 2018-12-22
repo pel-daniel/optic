@@ -23,7 +23,7 @@ export function agentConnection(connectCallback) {
 export function shouldStart() {
 	return new Promise((resolve, reject) => {
 		const agentC = agentConnection(() => {
-			resolve()
+			resolve(agentC)
 		})
 
 		agentC.onError((e) => {

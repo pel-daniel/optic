@@ -50,6 +50,6 @@ package object actors {
   case class AddRuntimeObjects(runtimeObjects: Vector[ObjectNode])
   case class GetContext(file: File)(implicit val sourceGear: SourceGear, val project: ProjectBase)
   case class NodeForId(id: String)
-  case class GetSnapshot(sourceGear: SourceGear, project: ProjectBase)
+  case class GetSnapshot(sourceGear: SourceGear, withAstGraph: Boolean, project: ProjectBase)
 
 }

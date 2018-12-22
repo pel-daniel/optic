@@ -111,7 +111,7 @@ object ConfigYamlProtocol extends DefaultYamlProtocol {
   }
 
   lazy implicit val OCObjectRefFormat = yamlFormat2(OCObjectRef)
-  lazy implicit val pfFormat = yamlFormat8(ProjectFileInterface)
+  lazy implicit val pfFormat = yamlFormat9(ProjectFileInterface)
   lazy implicit val secondaryPfFormat = yamlFormat2(SecondaryProjectFileInterface)
 
 

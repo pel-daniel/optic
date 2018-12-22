@@ -37,6 +37,11 @@ object Serialization {
     "concat-arrays" -> ConcatArrays
   ))
 
+  implicit lazy val runtimeFieldProcessAsFormat = EnumFormatsFromTypes.newFormats[RuntimeAnalysisTarget](Map(
+    "schema-def" -> SchemaDef,
+    "object-def" -> ObjectDef
+  ))
+
   implicit lazy val omchildrenruletypeFormat = EnumFormatsFromTypes.newFormats[OMChildrenRuleType](Map(
     "any" -> com.opticdev.sdk.rules.Any,
     "exact" -> Exact,
@@ -75,6 +80,7 @@ object Serialization {
   }
 
   implicit lazy val omlenscodecomponentFormat = Json.format[OMLensCodeComponent]
+  implicit lazy val omlensRuntimeComponent = Json.using[Json.WithDefaultValues].format[OMLensRuntimeComponent]
   implicit lazy val omlensassignmentcomponentFormats = Json.using[Json.WithDefaultValues].format[OMLensAssignmentComponent]
   implicit lazy val omlensschemacomponentFormat = Json.using[Json.WithDefaultValues].format[OMLensSchemaComponent]
 
@@ -90,6 +96,7 @@ object Serialization {
     override def reads(json: JsValue): JsResult[OMLensComponent] = {
       json.as[JsObject].value.keySet match {
         case x if x == Set("type", "at") => Json.fromJson[OMLensCodeComponent](json)
+        case x if x == Set("tokenAt", "processAs") || x == Set("tokenAt", "processAs", "identifier") => Json.fromJson[OMLensRuntimeComponent](json)
         case x if x == Set("fieldProcessor", "subcomponents", "enforceUniqueArguments") => Json.fromJson[OMLensComputedFieldComponent](json)
         case x if x.contains("schemaRef") => Json.fromJson[OMLensSchemaComponent](json)
         case x if x.contains("tokenAt") && x.contains("keyPath") => Json.fromJson[OMLensAssignmentComponent](json)

@@ -4,7 +4,6 @@ import akka.actor.{Actor, ActorRef, Status}
 import better.files.File
 import com.opticdev.server.http.controllers.{
   ContextQuery}
-import com.opticdev.server.http.helpers.IsMarkdown
 import com.opticdev.server.http.routes.socket.agents.AgentConnection
 import com.opticdev.server.http.routes.socket.agents.Protocol.{ContextFound, NoContextFound, SearchResults}
 import com.opticdev.server.http.routes.socket.{ErrorResponse, Success}

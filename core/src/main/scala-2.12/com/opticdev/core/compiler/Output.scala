@@ -1,5 +1,6 @@
 package com.opticdev.core.compiler
 
+import com.opticdev.common.graph.path.FlatWalkablePath
 import com.opticdev.core.compiler.errors.ErrorAccumulator
 import com.opticdev.core.compiler.helpers.FinderPath
 import com.opticdev.core.compiler.stages.MatchType
@@ -46,7 +47,7 @@ case class FinderStageOutput(componentFinders: Map[FinderPath, Vector[OMComponen
 
 //Source Gear factory output
 
-case class ParserFactoryOutput(parseGear: ParseGear)
+case class ParserFactoryOutput(parseGear: ParseGear, finderPathFlatten: FinderPath => FlatWalkablePath)
 case class RenderFactoryOutput(renderGear: RenderGear)
 
 case class MultiNodeLensOutput(multiNodeLens: CompiledMultiNodeLens)

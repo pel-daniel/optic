@@ -64,7 +64,7 @@ class ProjectActor(initialGraph: ProjectGraphWrapper)(implicit logToCli: Boolean
       sender ! graph
     }
     case NodeForId(id) => sender ! graph.nodeForId(id)
-    case GetSnapshot(sg, project) => sender ! Snapshot.forSourceGearAndProjectGraph(sg, graph.projectGraph, project.actorCluster.parserSupervisorRef, project)
+    case GetSnapshot(sg, withAstGraph, project) => sender ! Snapshot.forSourceGearAndProjectGraph(sg, graph.projectGraph, project.actorCluster.parserSupervisorRef, project, withAstGraph)
 
     //Forward parsing requests to the cluster supervisor
     case created: FileCreated => actorCluster.parserSupervisorRef ! ParseFile(created.file, sender(), created.project)(created.sourceGear)

@@ -7,10 +7,12 @@ import com.opticdev.core.sourcegear.actors.ActorCluster
 import com.opticdev.core.sourcegear.graph.{FileNode, NamedFile, NamedModel, ProjectGraph, SerializeProjectGraph}
 import com.opticdev.core.sourcegear.project.monitoring.FileStateMonitor
 import com.opticdev.core.sourcegear.project.status.{ImmutableProjectStatus, ProjectStatus}
-import com.opticdev.core.sourcegear.storage.ConnectedProjectGraphStorage
+import com.opticdev.core.sourcegear.storage.{ConnectedProjectGraphStorage, ProjectRuntimeFragmentStorage}
 import com.opticdev.core.sourcegear.sync.SyncPatch
+import com.opticdev.runtime.RuntimeValueFragment
 import play.api.libs.json.{JsObject, JsString}
 
+import scala.collection.immutable
 import scala.concurrent.Future
 
 package object project {
@@ -51,6 +53,11 @@ package object project {
     def onUpdatedModelNodeOptions(callback: (Set[NamedModel], Set[NamedFile])=> Unit) = {
       _updatedModelNodeOptionsCallbacks += callback
     }
+
+    //runtime fragment support (not stored in graph)
+    private var _runtimeFragments: Vector[RuntimeValueFragment] = ProjectRuntimeFragmentStorage.loadFromStorageAsRuntimeFragments(name).getOrElse(Vector.empty)
+    def runtimeFragments = _runtimeFragments
+    def setRuntimeFragments(vector: Vector[RuntimeValueFragment]) = _runtimeFragments = vector
 
     def publishProjectGraph = {
       import SerializeProjectGraph._

@@ -14,6 +14,7 @@ import com.opticdev.core.sourcegear.token_value.FileTokenRegistry
 import com.opticdev.common.graph.AstType
 import com.opticdev.parsers.token_values.{Internal, TokenRegistryEntry}
 import com.opticdev.parsers.{ParserBase, SourceParserManager}
+import com.opticdev.runtime.RuntimeSourceListener
 import com.opticdev.sdk.descriptions.enums.FinderEnums.{Containing, Entire}
 import com.opticdev.sdk.skills_sdk.SetValue
 import com.opticdev.sdk.skills_sdk.lens.{Literal, OMLensAssignmentComponent, OMLensCodeComponent, OMStringFinder}
@@ -113,11 +114,11 @@ class OMLensAssignmentComponentParsingSpec extends AkkaTestFixture("ParserGearTe
 
     def fixture = new {
       val parseGear = parseGearFixture
-      val lens = CompiledLens(None, "call-it", parseGear._2.packageRef, parseGear._2.schema, Set(AstType("CallExpression", "es7")), parseGear._1, null, 0, false)
+      val lens = CompiledLens(None, "call-it", parseGear._2.packageRef, parseGear._2.schema, Set(AstType("CallExpression", "es7")), parseGear._1, null, RuntimeSourceListener(Map()), 0, false)
 
       val assignLens = {
         val assignGear = parseAssignGearFixture
-        CompiledLens(None, "assign", assignGear._2.packageRef, assignGear._2.schema, Set(AstType("CallExpression", "es7")), assignGear._1, null, 0, false)
+        CompiledLens(None, "assign", assignGear._2.packageRef, assignGear._2.schema, Set(AstType("CallExpression", "es7")), assignGear._1, null, RuntimeSourceListener(Map()), 0, false)
       }
 
       implicit val sourceGear = new SourceGear {

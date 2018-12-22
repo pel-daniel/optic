@@ -16,6 +16,7 @@ import com.opticdev.core._
 import com.opticdev.core.sourcegear.context.FlatContext
 import com.opticdev.core.sourcegear.graph.ProjectGraph
 import com.opticdev.common.graph.AstType
+import com.opticdev.runtime.RuntimeSourceListener
 import com.opticdev.sdk.rules._
 import com.opticdev.sdk.descriptions.transformation.generate.StagedNode
 import com.opticdev.sdk.skills_sdk.lens
@@ -71,7 +72,7 @@ class RendererFactoryStageSpec extends AkkaTestFixture("RendererFactoryStageSpec
 
       val renderer = new RenderFactoryStage(sample(block), parseGear).run.renderGear
 
-      CompiledLens(Some("do"), "do", PackageRef.fromString("optic:test").get, Left(SchemaRef(Some(PackageRef("optic:test", "0.1.1")), "a")), Set(AstType("CallExpression", "es7")), parseGear, renderer, 1)
+      CompiledLens(Some("do"), "do", PackageRef.fromString("optic:test").get, Left(SchemaRef(Some(PackageRef("optic:test", "0.1.1")), "a")), Set(AstType("CallExpression", "es7")), parseGear, renderer, RuntimeSourceListener(Map()), 1)
     }
 
     val block =
@@ -92,7 +93,7 @@ class RendererFactoryStageSpec extends AkkaTestFixture("RendererFactoryStageSpec
 
     val renderer = new RenderFactoryStage(sample(block), parseGear).run.renderGear
 
-    val thisGear = CompiledLens(Some("wrapper"), "wrapper", PackageRef.fromString("optic:test").get, Left(SchemaRef(Some(PackageRef("optic:test", "0.1.1")), "b")), Set(AstType("CallExpression", "es7")), parseGear, renderer, 1)
+    val thisGear = CompiledLens(Some("wrapper"), "wrapper", PackageRef.fromString("optic:test").get, Left(SchemaRef(Some(PackageRef("optic:test", "0.1.1")), "b")), Set(AstType("CallExpression", "es7")), parseGear, renderer, RuntimeSourceListener(Map()), 1)
 
     val a = OMSchema(SchemaRef(Some(PackageRef("optic:test", "0.1.1")), "b"), JsObject.empty)
     val b = OMSchema(SchemaRef(Some(PackageRef("optic:test", "0.1.1")), "a"), JsObject.empty)

@@ -1,6 +1,6 @@
 import "regenerator-runtime/runtime";
 import path from 'path'
-const isDev = false
+const isDev = true
 
 const jreDirectory = require('os').homedir()+'/.optic-jre'
 
@@ -12,7 +12,7 @@ module.exports = (() => {
 			},
 			storageDirectory: process.cwd()+'/.optic-storage',
 			jreDirectory,
-			projectDirectory: '/Users/aidancunniffe/Desktop/time-tracker'
+			projectDirectory: '/Users/aidancunniffe/Desktop/test-runtime-code'
 		}
 	} else {
 

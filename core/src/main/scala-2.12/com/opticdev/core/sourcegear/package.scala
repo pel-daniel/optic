@@ -10,6 +10,7 @@ import com.opticdev.core.sourcegear.variables.VariableManager
 import com.opticdev.common.graph.{AstGraph, AstType}
 import com.opticdev.core.sourcegear.imports.FileImportsRegistry
 import com.opticdev.parsers.ParserBase
+import com.opticdev.runtime.RuntimeSourceListener
 import com.opticdev.sdk.skills_sdk.LensRef
 import com.opticdev.sdk.skills_sdk.schema.OMSchema
 import play.api.libs.json.Json

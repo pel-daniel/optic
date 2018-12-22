@@ -3,7 +3,7 @@ package com.opticdev.core.compiler.stages
 import com.opticdev.core.compiler.errors.AstPathNotFound
 import com.opticdev.core.compiler.helpers.FinderPath
 import com.opticdev.core.compiler.{FinderStageOutput, ParserFactoryOutput, SnippetStageOutput}
-import com.opticdev.core.sourcegear.accumulate.{AssignmentListener, ComputedFieldListener, Listener, MapSchemaListener}
+import com.opticdev.core.sourcegear.accumulate._
 import com.opticdev.core.sourcegear.containers.SubContainerManager
 import com.opticdev.core.sourcegear.gears.RuleProvider
 import com.opticdev.core.sourcegear.gears.parsing.{AdditionalParserInformation, NodeDescription, ParseAsModel}
@@ -41,10 +41,11 @@ class ParserFactoryStage(snippetStage: SnippetStageOutput, finderStageOutput: Fi
         listenersFromComponents(cc.component.asInstanceOf[OMLensComputedFieldComponent].accumulatorInputComponents),
         lens.lensRef
       )
+      case rc if rc.containsRuntimeComponent => RuntimeFieldListener(rc.asInstanceOf[OMComponentWithPropertyPath[OMLensRuntimeComponent]], lens.schemaRef, lens.lensRef)
     }
 
     val listeners = listenersFromComponents(
-      (lens.valueSchemaComponentsCompilerInput ++ lens.assignmentComponentsCompilerInput ++ lens.computedFieldComponentsCompilerInput)
+      (lens.valueSchemaComponentsCompilerInput ++ lens.assignmentComponentsCompilerInput ++ lens.computedFieldComponentsCompilerInput ++ lens.runtimeFieldComponentsCompilerInput)
         .asInstanceOf[Vector[OMComponentWithPropertyPath[OMLensComponent]]])
 
     if (lens.schemaRef.packageRef.isDefined && lens.schemaRef.packageRef.get != lens.packageRef) {
@@ -53,26 +54,30 @@ class ParserFactoryStage(snippetStage: SnippetStageOutput, finderStageOutput: Fi
       lens.schemaRef
     }
 
-    ParserFactoryOutput(
-      ParseAsModel(
-      nodeDescription,
-      lens.schemaRef,
-      finderStageOutput.componentFinders.map {
-        case (finderPath, components)=> (finderPathToFlatPath(finderPath, enterOn), components.filter(_.containsCodeComponent))
-      },
-      subcontainersManager.containerPaths,
-      finderStageOutput.ruleFinders.map {
-        case (finderPath, rules)=> (finderPathToFlatPath(finderPath, enterOn), rules)
-      },
-      listeners,
-      variableManager,
-      AdditionalParserInformation(snippetStage.parser.identifierNodeDesc, snippetStage.parser.blockNodeTypes.nodeTypes.toSeq),
-      lens.packageRef.packageId,
-      lens.lensRef,
-      lens.priority,
-      if (schemaDefaultsOption.isDefined) lens.initialValue ++ schemaDefaultsOption.get.value.toJson.as[JsObject] else lens.initialValue,
-      internal
-    ))
+    val finderPathFlatten: FinderPath => FlatWalkablePath = (fp: FinderPath) => finderPathToFlatPath(fp, enterOn)(graph)
+
+      ParserFactoryOutput(
+        ParseAsModel(
+        nodeDescription,
+        lens.schemaRef,
+        finderStageOutput.componentFinders.map {
+          case (finderPath, components)=> (finderPathToFlatPath(finderPath, enterOn), components.filter(_.containsCodeComponent))
+        },
+        subcontainersManager.containerPaths,
+        finderStageOutput.ruleFinders.map {
+          case (finderPath, rules)=> (finderPathToFlatPath(finderPath, enterOn), rules)
+        },
+        listeners,
+        variableManager,
+        AdditionalParserInformation(snippetStage.parser.identifierNodeDesc, snippetStage.parser.blockNodeTypes.nodeTypes.toSeq),
+        lens.packageRef.packageId,
+        lens.lensRef,
+        lens.priority,
+        if (schemaDefaultsOption.isDefined) lens.initialValue ++ schemaDefaultsOption.get.value.toJson.as[JsObject] else lens.initialValue,
+        internal
+      ),
+       finderPathFlatten
+    )
   }
 
   def finderPathToFlatPath(finderPath: FinderPath, node: CommonAstNode)(implicit graph: AstGraph): FlatWalkablePath = {

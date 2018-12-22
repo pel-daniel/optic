@@ -17,8 +17,10 @@ package object routes {
       def toObjectNode: ObjectNode = ObjectNode(name, abstractionOption, value, fromRuntime = true)
     }
     case class ClearRuntimeObjects(projectName: String)
+    case class AddRuntimeFragmentMessage(projectName: String, modelHash: String, runtimeComponentId: String, inferSchema: Boolean, value: JsValue)
 
     implicit val addObjectFormat = Json.format[AddObject]
+    implicit val addRuntimeFragmentMessage = Json.format[AddRuntimeFragmentMessage]
     implicit val clearRuntimeFormat = Json.format[ClearRuntimeObjects]
   }
 

@@ -24,6 +24,7 @@ import fs from 'fs'
 import {initStorage} from "./Storage";
 import {listCmd} from "./commands/control/list";
 import {inspectCmd} from "./commands/control/inspect";
+import {readtests} from "./commands/control/readtests";
 
 const storage = initStorage()
 
@@ -47,6 +48,7 @@ commands.attachCommand(installPluginsCmd, true)
 commands.attachCommand(refreshCmd)
 commands.attachCommand(listCmd, true, true)
 commands.attachCommand(inspectCmd, true, true)
+commands.attachCommand(readtests, true, true)
 
 export const standardHelp = () => program.helpInformation()
 

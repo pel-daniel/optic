@@ -22,14 +22,19 @@ class FinderStage(snippetStageOutput: SnippetStageOutput)(implicit val lens: OML
     val components: Vector[OMComponentWithPropertyPath[OMLensComponent]] = lens.valueComponentsCompilerInput.collect{
       case p if p.containsCodeComponent => p
       case p if p.containsAssignmentComponent && p.component.asInstanceOf[OMLensAssignmentComponent].fromToken => p
+      case p if p.containsRuntimeComponent => p
     }
 
     val evaluated = components.map(c=> {
       val at = {
         if (c.containsCodeComponent) {
           c.component.asInstanceOf[OMLensCodeComponent].at
-        } else {
+        } else if (c.containsAssignmentComponent) {
           c.component.asInstanceOf[OMLensAssignmentComponent].tokenAt.get
+        } else if (c.containsRuntimeComponent) {
+          c.component.asInstanceOf[OMLensRuntimeComponent].tokenAt
+        } else {
+          throw new Error("Unsupported finder type")
         }
       }
 
@@ -40,7 +45,6 @@ class FinderStage(snippetStageOutput: SnippetStageOutput)(implicit val lens: OML
         val errorString = finderPathTry.asInstanceOf[Failure[Exception]].exception.toString
         FinderError(c, errorString)
       } else {
-        val finderPath = finderPathTry.get
         (c, finderPathTry.get)
       }
     })

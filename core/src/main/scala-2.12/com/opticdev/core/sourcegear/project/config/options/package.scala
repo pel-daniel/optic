@@ -14,6 +14,7 @@ package object options {
   case class ProjectFileInterface(
   //core settings
   name: String,
+  testcmd: Option[String],
   parsers: Option[List[String]],
   skills: Option[List[PackageRef]],
   connected_projects: Option[List[String]],
@@ -34,7 +35,7 @@ package object options {
 
   case class CombinedInterface(primaryTry: Try[ProjectFileInterface], secondaryTry: List[Try[SecondaryProjectFileInterface]], fserrors: List[String]) {
 
-    val primary: ProjectFileInterface = primaryTry.getOrElse(ProjectFileInterface("Unknown Name", None, None, None, None, None, None, None))
+    val primary: ProjectFileInterface = primaryTry.getOrElse(ProjectFileInterface("Unknown Name", None, None, None, None, None, None, None, None))
     val secondary: Seq[SecondaryProjectFileInterface] = secondaryTry.collect{case s if s.isSuccess => s.get}
 
     //last declared name wins
@@ -56,6 +57,8 @@ package object options {
         primaryError.get +: secondaryErrors
       } else secondaryErrors
     } ++ fserrors
+
+    def testcmd = primaryTry.map(_.testcmd.get).toOption
 
     def isSuccess: Boolean = primaryTry.isSuccess && secondaryTry.forall(_.isSuccess)
     def isPartialSuccess: Boolean = primaryTry.isSuccess

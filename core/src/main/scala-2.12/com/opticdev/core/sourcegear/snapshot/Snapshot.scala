@@ -3,14 +3,15 @@ package com.opticdev.core.sourcegear.snapshot
 import akka.actor.ActorRef
 import akka.dispatch.Futures
 import com.opticdev.core.sourcegear.{SGContext, SourceGear}
-import com.opticdev.core.sourcegear.actors.GetContext
+import com.opticdev.core.sourcegear.actors.{GetContext, ParseSupervisorSyncAccess}
 import com.opticdev.core.sourcegear.graph.model._
 import com.opticdev.core.sourcegear.graph.{FileNode, ProjectGraph}
 import com.opticdev.core.sourcegear.project.ProjectBase
-import com.opticdev.common.graph.CommonAstNode
+import com.opticdev.common.graph.{AstGraph, CommonAstNode}
 import play.api.libs.json.JsObject
 import akka.pattern.ask
 import akka.util.Timeout
+import better.files.File
 import com.opticdev.core.sourcegear.graph.objects.ObjectNode
 
 import scala.collection.mutable
@@ -25,7 +26,8 @@ case class Snapshot(projectGraph: ProjectGraph,
                     expandedValues: Map[FlatModelNode, JsObject],
                     files: Map[FlatModelNode, FileNode],
                     contextForNode: Map[FlatModelNode, SGContext],
-                    objectNodes: Vector[ObjectNode])
+                    objectNodes: Vector[ObjectNode],
+                    astGraphs: Option[Map[File, AstGraphAndContent]])
 
 object Snapshot {
   implicit private val timeout: akka.util.Timeout = Timeout(1 minute)
@@ -34,7 +36,7 @@ object Snapshot {
     forSourceGearAndProjectGraph(project.projectSourcegear, project.projectGraph, project.actorCluster.parserSupervisorRef, project)
 
   /* use this if you're within an actor so you don't block it */
-  def forSourceGearAndProjectGraph(implicit sourceGear: SourceGear, projectGraph: ProjectGraph, parserSupervisorRef: ActorRef, projectBase: ProjectBase): Future[Snapshot] = {
+  def forSourceGearAndProjectGraph(implicit sourceGear: SourceGear, projectGraph: ProjectGraph, parserSupervisorRef: ActorRef, projectBase: ProjectBase, includeAstGraphs: Boolean = false): Future[Snapshot] = {
 
     import com.opticdev.core.sourcegear.graph.GraphImplicits._
 
@@ -73,7 +75,8 @@ object Snapshot {
         }
       }.toMap
 
-      Snapshot(projectGraph, sourceGear, linkedNodes, expandedValues, files, contextForNode, objectNodes)
+      val astGraphsOption = if (includeAstGraphs) Some(contextForNode.values.map(i => (i.file, AstGraphAndContent(i.astGraph, i.fileContents))).toMap) else None
+      Snapshot(projectGraph, sourceGear, linkedNodes, expandedValues, files, contextForNode, objectNodes, astGraphsOption)
     })
 
   }

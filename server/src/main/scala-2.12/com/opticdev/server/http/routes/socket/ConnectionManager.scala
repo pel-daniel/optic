@@ -35,7 +35,7 @@ trait ConnectionManager[A <: Connection, B] {
       .collect {
         case TextMessage.Strict(msg) => {
           if (!inProduction) {
-            println("RECEIVED " + msg)
+//            println("RECEIVED " + msg)
           }
           msg
         }
@@ -44,7 +44,7 @@ trait ConnectionManager[A <: Connection, B] {
       .map {
         case msg: OpticEvent => {
           if (!inProduction) {
-            println("SENT " + msg.asJson)
+//            println("SENT " + msg.asJson)
           }
           TextMessage.Strict(msg.asString)
         }

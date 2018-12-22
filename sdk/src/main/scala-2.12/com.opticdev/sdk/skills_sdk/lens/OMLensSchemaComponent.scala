@@ -38,4 +38,5 @@ case class OMComponentWithPropertyPath[T <: OMLensComponent](propertyPath: Seq[S
   def containsAssignmentComponent = component.isInstanceOf[OMLensAssignmentComponent]
   def containsSchemaComponent = component.isInstanceOf[OMLensSchemaComponent]
   def containsComputedComponent = component.isInstanceOf[OMLensComputedFieldComponent]
+  def containsRuntimeComponent = component.isInstanceOf[OMLensRuntimeComponent]
 }

@@ -17,7 +17,7 @@ class AssembleAPISpecSpec extends FunSpec {
       (mn.asInstanceOf[FlatModelNode], i._2)
     }).toMap
 
-    Snapshot(null, null, Map(), endpointMap, Map(), Map(), Vector())
+    Snapshot(null, null, Map(), endpointMap, Map(), Map(), Vector(), None)
   }
 
   val exampleAPI = Vector(

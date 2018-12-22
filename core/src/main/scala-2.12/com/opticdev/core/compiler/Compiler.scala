@@ -12,6 +12,7 @@ import com.opticdev.core.sourcegear.variables.VariableManager
 import com.opticdev.opm.context.{Context, PackageContext, Tree}
 import com.opticdev.opm.DependencyTree
 import com.opticdev.opm.packages.{OpticMDPackage, OpticPackage}
+import com.opticdev.runtime.RuntimeSourceListener
 import com.opticdev.sdk.skills_sdk.lens.OMLens
 
 import scala.collection.mutable.ListBuffer
@@ -75,7 +76,17 @@ object Compiler {
               finderStageOutput <- Try(new FinderStage(snippet).run)
               parser <- Try(new ParserFactoryStage(snippet, finderStageOutput, schemaDefaultsOption, lens.internal).run)
               renderer <- Try(new RenderFactoryStage(snippetOutput.get, parser.parseGear).run)
-              compiledLens <- Try(CompiledLens(lens.name, lens.id, lens.packageRef, lens.schema, snippetOutput.get.enterOn, parser.parseGear.asInstanceOf[ParseAsModel], renderer.renderGear, lens.priority, lens.internal))
+              compiledLens <- Try(CompiledLens(
+                lens.name,
+                lens.id,
+                lens.packageRef,
+                lens.schema,
+                snippetOutput.get.enterOn,
+                parser.parseGear.asInstanceOf[ParseAsModel],
+                renderer.renderGear,
+                RuntimeSourceListener.from(finderStageOutput, parser, lens.runtimeFieldComponentsCompilerInput),
+                lens.priority,
+                lens.internal))
             } yield compiledLens
 
             if (compiledTry.isSuccess) {

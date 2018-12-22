@@ -32,6 +32,8 @@ package object agents {
 
     case class StageSync(editorSlug: String) extends AgentEvents
 
+    case class StartRuntimeAnalysis() extends AgentEvents
+    case class FinishRuntimeAnalysis() extends AgentEvents
 
     //Sends
     trait UpdateAgentEvent extends OpticEvent {
@@ -141,6 +143,22 @@ package object agents {
     override def asJson: JsValue = JsObject(Seq(
       "event"-> JsString("collect-all-results"),
       "results" -> JsArray(results.map(i=> JsObject(Seq("name" -> i._1.map(JsString).getOrElse(JsNull), "value" -> i._2 ))))
+    ))
+  }
+
+  case class RuntimeAnalysisStarted(isSuccess: Boolean, testcmd: Option[String], error: Option[String])(implicit val projectDirectory: String) extends OpticEvent with UpdateAgentEvent {
+    override def asJson: JsValue = JsObject(Seq(
+      "event"-> JsString("runtime-analysis-started"),
+      "isSuccess" -> JsBoolean(isSuccess),
+      "testcmd" -> (if (testcmd.isDefined) JsString(testcmd.get) else JsNull),
+      "error" -> (if (error.isDefined) JsString(error.get) else JsNull)
+    ))
+  }
+
+  case class RuntimeAnalysisFinished()(implicit val projectDirectory: String) extends OpticEvent with UpdateAgentEvent {
+    override def asJson: JsValue = JsObject(Seq(
+      "event"-> JsString("runtime-analysis-finished"),
+//      "error" -> (if (error.isDefined) JsString(error.get) else JsNull)
     ))
   }
 

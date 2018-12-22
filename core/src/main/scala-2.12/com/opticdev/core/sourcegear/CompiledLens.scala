@@ -8,6 +8,7 @@ import com.opticdev.core.sourcegear.variables.VariableManager
 import com.opticdev.core.utils.UUID
 import com.opticdev.parsers.ParserBase
 import com.opticdev.common.graph.{AstGraph, AstType, CommonAstNode}
+import com.opticdev.runtime.RuntimeSourceListener
 import com.opticdev.sdk.skills_sdk.LensRef
 import com.opticdev.sdk.skills_sdk.schema.OMSchema
 import play.api.libs.json.{Format, JsString, JsSuccess, JsValue}
@@ -25,6 +26,7 @@ case class CompiledLens(name: Option[String],
                         enterOn: Set[AstType],
                         parser : ParseAsModel,
                         renderer : RenderGear,
+                        runtimeListener: RuntimeSourceListener,
                         priority: Int,
                         internal: Boolean = false,
                        ) extends SGExportableLens {

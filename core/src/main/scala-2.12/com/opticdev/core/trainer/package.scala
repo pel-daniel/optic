@@ -54,7 +54,7 @@ package object trainer {
 
   case class TrainingResults(candidates: Seq[ValueCandidate],
                              containerCandidates: Seq[ContainerCandidate],
-                             variableCandidates: Seq[VariableCandidate]
+                             variableCandidates: Seq[VariableCandidate],
                             ) {
 
     def asJson: JsValue = Json.toJson[TrainingResults](this)

@@ -1,0 +1,46 @@
+{
+  "info": {
+    "package": "runtimetest",
+    "version": "0.1.0",
+    "author": "optic"
+  },
+  "lenses": [
+    {
+      "name": "Source",
+      "id": "source",
+      "schema": "runtime-schema",
+      "snippet": {
+        "language": "es7",
+        "block": "res.send(test)"
+      },
+      "value": {
+        "runtimeValue": {
+          "tokenAt": {
+              "astType": "Identifier",
+              "range": {
+                "start": 9,
+                "end": 13
+            }
+          },
+          "processAs": "object-def",
+          "identifier": "Lyql2bQUx"
+        }
+      }
+    }
+  ],
+  "schemas": [
+    {
+      "id": "runtime-schema",
+      "definition": {
+        "title": "source",
+        "type": "object",
+        "properties": {
+          "runtimeValue": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  ],
+  "transformations": []
+}

@@ -18,6 +18,7 @@ import com.opticdev.common.graph.path.FlatWalkablePath
 import com.opticdev.common.graph.{AstType, Child}
 import com.opticdev.core.sourcegear.graph.objects.ObjectNode
 import com.opticdev.core.sourcegear.project.config.options.ConstantObject
+import com.opticdev.runtime.RuntimeSourceListener
 import com.opticdev.sdk.descriptions._
 import com.opticdev.sdk.descriptions.enums.{BasicComponentType, Literal, NotSupported, Token}
 import com.opticdev.sdk.{BoolProperty, _}
@@ -184,6 +185,7 @@ object PickleImplicits extends PicklerHelper {
       state.pickle(value.enterOn)
       state.pickle(value.parser)
       state.pickle(value.renderer)
+      state.pickle(value.runtimeListener)
       state.pickle(value.priority)
       state.pickle(value.internal)
     }
@@ -196,6 +198,7 @@ object PickleImplicits extends PicklerHelper {
         state.unpickle[Set[AstType]],
         state.unpickle[ParseAsModel],
         state.unpickle[RenderGear],
+        state.unpickle[RuntimeSourceListener],
         state.unpickle[Int],
         state.unpickle[Boolean]
       )

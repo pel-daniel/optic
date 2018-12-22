@@ -7,6 +7,7 @@ import com.opticdev.core.sourcegear.actors.ParseSupervisorSyncAccess
 import com.opticdev.core.sourcegear.graph.model.{BaseModelNode, ModelNode}
 import com.opticdev.core.sourcegear.graph.objects.ObjectNode
 import com.opticdev.core.sourcegear.sync.SyncPatch
+import com.opticdev.runtime.RuntimeManager
 import com.opticdev.server.http.controllers.{ArrowPostChanges, ArrowTransformationOptions, ArrowTransformationOptionsQuery, PutUpdateRequest}
 import com.opticdev.server.http.routes.socket.ErrorResponse
 import com.opticdev.server.http.routes.socket.agents.Protocol._
@@ -126,6 +127,36 @@ class AgentConnectionActor(implicit projectDirectory: String, projectsManager: P
       }
 
       AgentConnection.broadcastUpdate(CollectAllResults(results))
+    }
+
+    case StartRuntimeAnalysis() => {
+      val pm = projectsManager
+      val project = projectsManager.projectForDirectory(projectDirectory)
+      val projectGraph = project.projectGraph
+      val sessionStart = Try(RuntimeManager.newSession(project))
+
+      if (sessionStart.isFailure) {
+        AgentConnection.broadcastUpdate(RuntimeAnalysisStarted(isSuccess = false, None, Some(sessionStart.failed.get.getMessage)))
+      } else {
+        sessionStart.get.onComplete(i => {
+          val response = if (i.isSuccess)
+            RuntimeAnalysisStarted(isSuccess = true, project.projectFile.interface.testcmd, None) else
+            RuntimeAnalysisStarted(isSuccess = false, None, Some(i.failed.get.getMessage))
+          AgentConnection.broadcastUpdate(response)
+        })
+      }
+    }
+
+    case FinishRuntimeAnalysis() => {
+      if (RuntimeManager.session.isDefined) {
+        val finish = RuntimeManager.finish
+        AgentConnection.broadcastUpdate(
+          if (finish.isSuccess) {
+            RuntimeAnalysisFinished()
+          } else {
+            RuntimeAnalysisFinished()
+        })
+      }
     }
 
     case updateAgentEvent: UpdateAgentEvent => {

@@ -20,6 +20,7 @@ export const inspectCmd = {
 			}
 			clear()
 			let nothingSinceLast = true
+
 			console.log(`${colors.blue(editorSlug)} ${relativeFilePath}:${line}`)
 
 			const filtered = results.models.filter(i => included.includes(i.schemaRef))
@@ -27,6 +28,9 @@ export const inspectCmd = {
 				const item = filtered[0]
 				if (item.sync.name) {
 					console.log(`Name: ${colors.green(item.sync.name).bold}`)
+					delete item.value._variables
+					console.log(prettyjson.render(item.value))
+				} else {
 					delete item.value._variables
 					console.log(prettyjson.render(item.value))
 				}

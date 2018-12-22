@@ -13,6 +13,7 @@ import com.opticdev.core.sourcegear.variables.VariableManager
 import com.opticdev.common.graph.CommonAstNode
 import com.opticdev.common.graph.path.FlatWalkablePath
 import com.opticdev.core.sourcegear.project.config.options.DefaultSettings
+import com.opticdev.runtime.RuntimeSourceListener
 import com.opticdev.sdk.descriptions.RuleWithFinder
 import com.opticdev.sdk.skills_sdk.lens.{OMComponentWithPropertyPath, OMLens, OMLensCodeComponent, OMLensComponent}
 import play.api.libs.json.JsObject
@@ -86,6 +87,7 @@ class MultiNodeParserFactoryStage(snippetStage: SnippetStageOutput, schemaDefaul
               snippet.enterOn,
               parser.parseGear.asInstanceOf[ParseAsModel],
               renderer.renderGear,
+              RuntimeSourceListener.from(finderStage, parser, childLens.runtimeFieldComponentsCompilerInput),
               lens.priority,
               internal = true)
           }

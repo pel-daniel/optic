@@ -8,6 +8,7 @@ import com.opticdev.core.sourcegear.graph.ProjectGraph
 import com.opticdev.core.sourcegear.{CompiledLens, LensSet, SourceGear}
 import com.opticdev.common.graph.AstType
 import com.opticdev.parsers.{ParserBase, SourceParserManager}
+import com.opticdev.runtime.RuntimeSourceListener
 import com.opticdev.sdk.descriptions._
 import com.opticdev.sdk.descriptions.enums.FinderEnums.{Containing, Entire, Starting}
 import com.opticdev.sdk.rules._
@@ -28,7 +29,7 @@ object ExampleSourcegearFixtures extends TestBase with GearUtils with ParserUtil
 
       val renderer = new RenderFactoryStage(sample(block), parseGear).run.renderGear
 
-      CompiledLens(Some("do"), "do", PackageRef.fromString("optic:test").get, Left(SchemaRef(Some(PackageRef("optic:test", "0.1.0")), "response")), Set(AstType("MemberExpression", "es7")), parseGear, renderer, 1)
+      CompiledLens(Some("do"), "do", PackageRef.fromString("optic:test").get, Left(SchemaRef(Some(PackageRef("optic:test", "0.1.0")), "response")), Set(AstType("MemberExpression", "es7")), parseGear, renderer, RuntimeSourceListener(Map()), 1)
     }
 
     val queryGear = {
@@ -57,7 +58,7 @@ object ExampleSourcegearFixtures extends TestBase with GearUtils with ParserUtil
 
       val renderer = new RenderFactoryStage(sample(block), parseGear).run.renderGear
 
-      CompiledLens(Some("query"), "queryLens", PackageRef.fromString("optic:test").get, Left(SchemaRef(Some(PackageRef("optic:test", "0.1.0")), "query")), Set(AstType("CallExpression", "es7")), parseGear, renderer, 1)
+      CompiledLens(Some("query"), "queryLens", PackageRef.fromString("optic:test").get, Left(SchemaRef(Some(PackageRef("optic:test", "0.1.0")), "query")), Set(AstType("CallExpression", "es7")), parseGear, renderer, RuntimeSourceListener(Map()), 1)
     }
 
     val block =
@@ -81,7 +82,7 @@ object ExampleSourcegearFixtures extends TestBase with GearUtils with ParserUtil
 
     val renderer = new RenderFactoryStage(sample(block), parseGear).run.renderGear
 
-    val routeGear = CompiledLens(Some("wrapper"), "wrapper", PackageRef.fromString("optic:test").get, Left(SchemaRef(Some(PackageRef("optic:test", "0.1.0")), "route")), Set(AstType("CallExpression", "es7")), parseGear, renderer, 1)
+    val routeGear = CompiledLens(Some("wrapper"), "wrapper", PackageRef.fromString("optic:test").get, Left(SchemaRef(Some(PackageRef("optic:test", "0.1.0")), "route")), Set(AstType("CallExpression", "es7")), parseGear, renderer, RuntimeSourceListener(Map()), 1)
 
     val schemaSet = Seq(
       OMSchema(SchemaRef(Some(PackageRef("optic:test", "0.1.0")), "query"), JsObject.empty),

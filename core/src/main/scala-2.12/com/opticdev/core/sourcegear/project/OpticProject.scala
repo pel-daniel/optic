@@ -18,6 +18,7 @@ import com.opticdev.core.sourcegear.project.status.ProjectStatus
 import com.opticdev.core.sourcegear.snapshot.Snapshot
 import com.opticdev.core.sourcegear.storage.ProjectRuntimeObjectStorage
 import com.opticdev.core.sourcegear.sync.{DiffSyncGraph, SyncPatch}
+import com.opticdev.runtime.RuntimeManager
 import net.jcazevedo.moultingyaml.YamlString
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -72,11 +73,21 @@ abstract class OpticProject(val name: String, val baseDirectory: File)(implicit 
   }
 
   var lastSGHash = ""
+
+
+  private var _loadingProjectPromise = Promise[Unit]()
+  private var _firstPassCompletePromise = Promise[Unit]()
+  private var _firstPassCompleteFuture = Future.sequence(Seq(_loadingProjectPromise.future, _firstPassCompletePromise.future))
+  def onFirstPassComplete = _firstPassCompleteFuture
+
   def rereadAll = {
     implicit val timeout: akka.util.Timeout = Timeout(5 minutes)
     implicit val sourceGear = projectSourcegear
 
     if (sourceGear.configHash != lastSGHash && !sourceGear.isEmpty) {
+
+
+      (if (!_loadingProjectPromise.isCompleted) _loadingProjectPromise.success(Unit))
 
       //should delete all
       ProjectActorSyncAccess.clearGraph(projectActor)
@@ -86,12 +97,15 @@ abstract class OpticProject(val name: String, val baseDirectory: File)(implicit 
         .foreach(ProjectActorSyncAccess.addConnectedAddRuntimeObjects(projectActor, _))
       ParseSupervisorSyncAccess.clearCache()
 
+      lastSGHash = sourceGear.configHash
+
       projectStatusInstance.firstPassStatus = InProgress
 
       val futures = filesToWatch.toSeq.map(i => projectActor ? FileCreated(i, this))
 
       Future.sequence(futures).onComplete(i => {
         projectStatusInstance.firstPassStatus = Complete
+        (if (!_firstPassCompletePromise.isCompleted) _firstPassCompletePromise.success(Unit))
         projectStatusInstance.touch
       })
 
@@ -106,13 +120,15 @@ abstract class OpticProject(val name: String, val baseDirectory: File)(implicit 
       if (shouldWatchFile(file)) projectActor ! FileCreated(file, this)
     }
     case (EventType.ENTRY_MODIFY, file) => {
-      implicit val sourceGear = projectSourcegear
-      projectStatusInstance.touch
-      filesStateMonitor.markUpdated(file)
-      if (projectFile.fileUpdateTriggersReload(file)) {
-        projectFile.reload
-      } else {
-        if (shouldWatchFile(file)) projectActor ! FileUpdated(file, this)
+      if (!RuntimeManager.isCollecting) { //we don't want to accident process our temporary changes
+        implicit val sourceGear = projectSourcegear
+        projectStatusInstance.touch
+        filesStateMonitor.markUpdated(file)
+        if (projectFile.fileUpdateTriggersReload(file)) {
+          projectFile.reload
+        } else {
+          if (shouldWatchFile(file)) projectActor ! FileUpdated(file, this)
+        }
       }
     }
     case (EventType.ENTRY_DELETE, file) => {
@@ -159,14 +175,14 @@ abstract class OpticProject(val name: String, val baseDirectory: File)(implicit 
 
   def filesToWatch : Set[File] = baseDirectory.listRecursively.toVector.filter(shouldWatchFile).toSet
 
-  def snapshot: Future[Snapshot] = {
+  def snapshot(withAstGraph: Boolean = false): Future[Snapshot] = {
     implicit val timeout: akka.util.Timeout = Timeout(1 minute)
-    (projectActor ? GetSnapshot(projectSourcegear, this)).mapTo[Future[Snapshot]].flatten
+    (projectActor ? GetSnapshot(projectSourcegear, withAstGraph, this)).mapTo[Future[Snapshot]].flatten
   }
 
   def syncPatch: Future[SyncPatch] = {
     implicit val timeout: akka.util.Timeout = Timeout(1 minute)
-    snapshot.map(snapshot=> DiffSyncGraph.calculateDiff(snapshot)(this))
+    snapshot(false).map(snapshot=> DiffSyncGraph.calculateDiff(snapshot)(this))
   }
 
 }

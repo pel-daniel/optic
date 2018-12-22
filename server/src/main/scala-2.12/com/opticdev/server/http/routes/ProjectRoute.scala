@@ -13,6 +13,7 @@ import com.opticdev.common.{BuildInfo, SchemaRef}
 import com.opticdev.core.sourcegear.project.ProjectInfo
 import com.opticdev.core.sourcegear.project.status.{ImmutableProjectStatus, NotLoaded, ProjectStatus}
 import com.opticdev.core.sourcegear.storage.ProjectRuntimeObjectStorage
+import com.opticdev.runtime.{RuntimeManager, RuntimeValueFragment}
 import com.opticdev.server.http.HTTPResponse
 import com.opticdev.server.http.routes.RuntimeProtocol._
 import com.opticdev.server.state.ProjectsManager
@@ -99,6 +100,23 @@ class ProjectRoute(implicit executionContext: ExecutionContext, projectsManager:
             complete(StatusCodes.OK, "Added")
           } else {
             complete(StatusCodes.NotFound, "Project Not Found")
+          }
+        }
+      } ~
+      path("runtime-value-fragment") {
+        entity(as[AddRuntimeFragmentMessage]) { addRuntimeFragment =>
+          if (RuntimeManager.isCollecting) {
+            val project = projectsManager.lookupProject(addRuntimeFragment.projectName).map(projectsManager.loadProject)
+            if (project.isSuccess) {
+              RuntimeManager.session.get.receiveFragment(
+                RuntimeValueFragment(addRuntimeFragment.modelHash, addRuntimeFragment.runtimeComponentId, addRuntimeFragment.value)
+              )
+              complete(StatusCodes.OK, "Added")
+            } else {
+              complete(StatusCodes.NotFound, "Project Not Found")
+            }
+          } else {
+            complete(StatusCodes.Forbidden, "Runtime collection not started")
           }
         }
       }

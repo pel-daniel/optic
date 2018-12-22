@@ -7,6 +7,7 @@ import com.opticdev.core.compiler.stages.RenderFactoryStage
 import com.opticdev.core.sourcegear.context.FlatContext
 import com.opticdev.core.sourcegear.graph.ProjectGraph
 import com.opticdev.parsers.{ParserBase, SourceParserManager}
+import com.opticdev.runtime.RuntimeSourceListener
 import com.opticdev.sdk.descriptions.enums.FinderEnums.{Containing, Entire}
 import com.opticdev.sdk.descriptions._
 import com.opticdev.sdk.descriptions.enums.RuleEnums
@@ -22,8 +23,8 @@ class RenderSpec extends TestBase with PrivateMethodTester with GearUtils with P
 
     lazy val testSchemaRef = SchemaRef.fromString("test:schemas@0.1.0/a").get
 
-    lazy val a = CompiledLens(Some("test"), "test", PackageRef.fromString("optic:test@0.1.0").get, Left(testSchemaRef), Set(), DummyCompilerOutputs.parser, DummyCompilerOutputs.render, 1)
-    lazy val b = CompiledLens(Some("other"), "other", PackageRef.fromString("optic:test@0.1.0").get, Left(testSchemaRef), Set(), DummyCompilerOutputs.parser, DummyCompilerOutputs.render, 1)
+    lazy val a = CompiledLens(Some("test"), "test", PackageRef.fromString("optic:test@0.1.0").get, Left(testSchemaRef), Set(), DummyCompilerOutputs.parser, DummyCompilerOutputs.render, RuntimeSourceListener(Map()), 1)
+    lazy val b = CompiledLens(Some("other"), "other", PackageRef.fromString("optic:test@0.1.0").get, Left(testSchemaRef), Set(), DummyCompilerOutputs.parser, DummyCompilerOutputs.render, RuntimeSourceListener(Map()), 1)
 
 
     val testSchema = OMSchema(testSchemaRef, JsObject.empty)

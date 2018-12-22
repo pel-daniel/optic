@@ -14,7 +14,7 @@ class SnapshotSpec extends AkkaTestFixture("SnapshotSpec") with SyncFixture with
     val f = fixture("test-examples/resources/example_source/sync/Sync.js")
     implicit val project = f.project
 
-    val snapshot = project.snapshot
+    val snapshot = project.snapshot(false)
 
     val result = Await.result(snapshot, 20 seconds)
 
