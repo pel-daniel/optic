@@ -13,7 +13,6 @@ import {createuserCmd} from "./commands/control/createuser";
 import {adduserCmd} from "./commands/control/adduser";
 import {syncCmd} from "./commands/optic/sync";
 import {serverStatus} from "./optic/IsRunning";
-import {searchCmd} from "./commands/optic/search";
 import "regenerator-runtime/runtime";
 import {setupFlow} from "./commands/SetupFlow";
 import {track} from "./Analytics";
@@ -37,7 +36,6 @@ program
 	.version(pJson.version)
 
 //Optic Commands
-commands.attachCommand(searchCmd)
 commands.attachCommand(syncCmd)
 
 //Control Commands

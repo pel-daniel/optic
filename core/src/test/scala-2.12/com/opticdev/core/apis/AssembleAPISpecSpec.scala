@@ -17,7 +17,7 @@ class AssembleAPISpecSpec extends FunSpec {
       (mn.asInstanceOf[FlatModelNode], i._2)
     }).toMap
 
-    Snapshot(null, null, Map(), endpointMap, Map(), Map(), Vector(), None)
+    Snapshot(null, null, Map(), endpointMap, Map(), Map(), Vector(), None, "abc")
   }
 
   val exampleAPI = Vector(
@@ -34,6 +34,6 @@ class AssembleAPISpecSpec extends FunSpec {
   it("can collect endpoints into spec") {
     val snapshot = snapshotFixture(exampleAPI)
     val result = AssembleAPISpec.fromSnapshot(snapshot)
-    assert(result.result.endpoints.size == 1)
+    assert(result.result.apiSpec.endpoints.size == 1)
   }
 }

@@ -27,7 +27,8 @@ case class Snapshot(projectGraph: ProjectGraph,
                     files: Map[FlatModelNode, FileNode],
                     contextForNode: Map[FlatModelNode, SGContext],
                     objectNodes: Vector[ObjectNode],
-                    astGraphs: Option[Map[File, AstGraphAndContent]])
+                    astGraphs: Option[Map[File, AstGraphAndContent]],
+                    projectName: String)
 
 object Snapshot {
   implicit private val timeout: akka.util.Timeout = Timeout(1 minute)
@@ -76,7 +77,7 @@ object Snapshot {
       }.toMap
 
       val astGraphsOption = if (includeAstGraphs) Some(contextForNode.values.map(i => (i.file, AstGraphAndContent(i.astGraph, i.fileContents))).toMap) else None
-      Snapshot(projectGraph, sourceGear, linkedNodes, expandedValues, files, contextForNode, objectNodes, astGraphsOption)
+      Snapshot(projectGraph, sourceGear, linkedNodes, expandedValues, files, contextForNode, objectNodes, astGraphsOption, projectBase.name)
     })
 
   }

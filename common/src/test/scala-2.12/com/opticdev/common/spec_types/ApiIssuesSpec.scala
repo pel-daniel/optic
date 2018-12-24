@@ -1,4 +1,4 @@
-package com.opticdev.common.api_types
+package com.opticdev.common.spec_types
 
 import org.scalatest.FunSpec
 import play.api.libs.json.JsObject
