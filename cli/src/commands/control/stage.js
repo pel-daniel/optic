@@ -43,7 +43,14 @@ export async function getStagedSpec(cmd) {
 		}
 	})
 
-	agentConnection().onRuntimeAnalysisFinished((data) => {
+	let runtimeIssues = []
+	agentConnection().onRuntimeAnalysisFinished(({isSuccess, results, error}) => {
+		if (isSuccess) {
+			console.log(colors.green(`Runtime analysis completed`))
+			runtimeIssues = results.issues
+		} else {
+			console.log(colors.yellow(`Error executing Runtime analysis. Run 'optic readtests' to debug further. `))
+		}
 		startSnapshot()
 	})
 
@@ -59,6 +66,9 @@ export async function getStagedSpec(cmd) {
 		console.log('\n')
 		console.log(colors.green('Snapshot Generated'))
 		console.log(colors.green(`${data.snapshot.apiSpec.endpoints.length} endpoints documented`))
+
+		//add runtime issues to project issues
+		data.snapshot.projectIssues = [...data.snapshot.projectIssues, runtimeIssues]
 
 		PostSnapshot(data.snapshot.name, {snapshot: data.snapshot, opticVersion: pJson.version, branch})
 			.then((response) => {

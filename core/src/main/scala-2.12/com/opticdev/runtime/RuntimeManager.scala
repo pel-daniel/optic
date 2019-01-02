@@ -36,8 +36,6 @@ object RuntimeManager {
     val lensesIncludingListeners = snapshot.sourceGear.lensSet.listLenses.collect{ case baseLens: CompiledLens if baseLens.runtimeListener.nonEmpty => baseLens }
     val targetRuntimeNodes: Map[LensRef, Map[FlatModelNode, ExpandedModelNode]] = snapshot.linkedModelNodes.filter(model => lensesIncludingListeners.exists(_.lensRef == model._1.lensRef)).groupBy(_._1.lensRef)
 
-    println("Targets: "+ targetRuntimeNodes.values.flatten.size)
-
     lensesIncludingListeners.toVector.flatMap{ case lens =>
       val runtimeListener = lens.runtimeListener
 

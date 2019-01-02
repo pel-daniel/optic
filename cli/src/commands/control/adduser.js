@@ -8,66 +8,27 @@ import {LoginUserRequest} from "../../api/Requests";
 import keytar from 'keytar'
 export const adduserCmd = {
 	name: 'adduser',
-	options: [
-		["--token <string>", 'add api token directly']
-	],
 	action: (cmd) => {
-
-		const rawToken = cmd.rawArgs[3]
-		if (rawToken) {
-			keytar.setPassword('optic-cli', 'main', rawToken)
-			console.log('API Token Added')
-			process.exit()
-		}
-
+		console.log('Generate a new token or copy one from useoptic.com. Navigating to account page now...')
+		setTimeout(() => {
+			opn('https://app.useoptic.com/#/account')
+		}, 3000)
 		inquirer
 			.prompt([
 				{
-					type: 'confirm',
-					message: 'Do you have an existing Optic account?',
-					name: 'hasAccount',
-				}])
-			.then((answers) => {
-				if (answers.hasAccount) {
-					promptCredentials()
-				} else {
-					opn('https://useoptic.com')
-					console.log(`Opening useoptic.com \nSign up and then rerun 'optic adduser'`)
-					process.exit()
-				}
-			})
+					type: 'input',
+					message: 'Paste your API Token:',
+					name: 'token',
+				},
+
+			]).then((answers) => {
+			keytar.setPassword('optic-cli', 'main', answers.token.trim())
+			console.log('Token Saved. You are ready to go')
+		})
 	}
 }
 
 
-function promptCredentials() {
-	inquirer
-		.prompt([
-			{
-				type: 'input',
-				message: 'username',
-				name: 'username',
-			},
-			{
-				type: 'password',
-				message: 'password',
-				name: 'password',
-			}
-		]).then((answers) => {
+function promptToken() {
 
-		LoginUserRequest({...answers})
-			.then(({isSuccess, user, apiKey}) => {
-				if (isSuccess) {
-					keytar.setPassword('optic-cli', 'main', apiKey)
-					console.log(colors.green(`Login successful. An API Token has been issued.`))
-				} else {
-					clear()
-					console.log(colors.red('Login invalid. Please try again'))
-					promptCredentials()
-				}
-			})
-			.catch((error) => {
-				console.log(colors.red('Login invalid. Please try again'))
-			})
-	})
 }
