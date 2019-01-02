@@ -42,6 +42,7 @@ package object model {
   }
 
   case class NodeMapping(node: CommonAstNode, relationship : AstPropertyRelationship.Value) extends AstMapping
+  case class ModelMapping(model: ModelNode) extends AstMapping {override val relationship = AstPropertyRelationship.Model}
   case class ModelVectorMapping(models: Vector[ModelNode]) extends AstMapping {override val relationship = AstPropertyRelationship.Model}
   case class ContainerMapping(containerRoot: CommonAstNode) extends AstMapping {override val relationship = AstPropertyRelationship.NoRelationship}
   case object NoMapping extends AstMapping {override val relationship = AstPropertyRelationship.NoRelationship}

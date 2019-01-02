@@ -15,7 +15,6 @@ class Project(name: String, baseDirectory: File)(implicit logToCli: Boolean = fa
 
   private var sourceGear: SourceGear = {
     projectStatusInstance.sourceGearStatus = Building
-    projectFileChanged(projectFile)
     SourceGear.unloaded
   }
 

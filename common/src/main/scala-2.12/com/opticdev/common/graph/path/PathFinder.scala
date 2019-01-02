@@ -24,7 +24,8 @@ case class WalkablePath(rootNode: CommonAstNode, childPath: Vector[Child], graph
     })
 
     if (none) {
-      null
+      println("NODE NOT FOUND AT PATH")
+      throw new Error("No node found at path")
     } else {
       currentNode
     }

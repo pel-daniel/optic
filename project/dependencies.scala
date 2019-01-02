@@ -35,6 +35,7 @@ object Dependencies {
     "org.apache.commons" % "commons-lang3" % "3.6",
     "com.github.pathikrit" % "better-files_2.12" % betterFilesVersion,
     "com.typesafe.play" %% "play-json" % "2.6.11",
+    "io.leonard" %% "play-json-traits" % "1.4.4",
     "org.scalactic" %% "scalactic" % scalaTestVersion,
     "org.scalatest" %% "scalatest" % scalaTestVersion % "test",
     "com.vdurmont" % "semver4j" % "2.2.0",

@@ -21,7 +21,7 @@ class RuntimeAnalysisSpec extends RuntimeTestRig {
     assert(fileChanges.size == 1)
 
     val parserRandomInstanceId = f.snapshot.sourceGear.parsers.head.runtimeHelper.get.calleeToken
-    assert(fileChanges.head.newContents == s"const ${parserRandomInstanceId} = require('optic-helper').addRuntimeFragment\n\n\nconst handler = (req, res) => {\n    const hello = {success: true, value: {firstName: 'a', lastName: 'c'}}\n    res.send(${parserRandomInstanceId}('168a61e7', 'Lyql2bQUx', true.toString, hello))\n}\n\n\nconst handler2 = (req, res) => {\n    const hello = {success: true, value: {firstName: 'a', lastName: 'c'}}\n    if (req.query.a) {\n        res.send(${parserRandomInstanceId}('e54b2c36', 'Lyql2bQUx', true.toString, hello))\n    } else {\n        res.send({them: true, those: false})\n    }\n}")
+    assert(fileChanges.head.newContents == s"const ${parserRandomInstanceId} = require('optic-helper').addRuntimeFragment\n\n\nconst handler = (req, res) => {\n    const hello = {success: true, value: {firstName: 'a', lastName: 'c'}}\n    res.send(${parserRandomInstanceId}('168a61e7', 'Lyql2bQUx', true, {}, hello))\n}\n\n\nconst handler2 = (req, res) => {\n    const hello = {success: true, value: {firstName: 'a', lastName: 'c'}}\n    if (req.query.a) {\n        res.send(${parserRandomInstanceId}('e54b2c36', 'Lyql2bQUx', true, {}, hello))\n    } else {\n        res.send({them: true, those: false})\n    }\n}")
   }
 
   it("will setup for analysis and cleanup") {
@@ -45,7 +45,7 @@ class RuntimeAnalysisSpec extends RuntimeTestRig {
     RuntimeManager.receiveFragment(RuntimeValueFragment("3", "hijklmnop", JsObject.empty))
 
     val fragments = RuntimeManager.finish.get
-    assert(fragments.size == 3)
+    assert(fragments.runtimeFragments.size == 3)
   }
 
 }

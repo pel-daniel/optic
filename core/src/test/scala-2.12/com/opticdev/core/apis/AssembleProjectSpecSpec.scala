@@ -7,7 +7,7 @@ import com.opticdev.core.sourcegear.snapshot.Snapshot
 import org.scalatest.FunSpec
 import play.api.libs.json.{JsObject, Json}
 
-class AssembleAPISpecSpec extends FunSpec {
+class AssembleProjectSpecSpec extends FunSpec {
   val apiSchemaId = SchemaRef(Some(PackageRef("apiatlas:schemas")), "endpoint")
   def snapshotFixture(endpoints: Vector[(String, JsObject)]) = {
 
@@ -17,7 +17,7 @@ class AssembleAPISpecSpec extends FunSpec {
       (mn.asInstanceOf[FlatModelNode], i._2)
     }).toMap
 
-    Snapshot(null, null, Map(), endpointMap, Map(), Map(), Vector(), None, "abc")
+    Snapshot(null, null, Map(), endpointMap, Map(), Map(), Vector(), None)
   }
 
   val exampleAPI = Vector(
@@ -33,7 +33,7 @@ class AssembleAPISpecSpec extends FunSpec {
 
   it("can collect endpoints into spec") {
     val snapshot = snapshotFixture(exampleAPI)
-    val result = AssembleAPISpec.fromSnapshot(snapshot)
+    val result = AssembleProjectSpec.fromSnapshot(snapshot, None, "Project")
     assert(result.result.apiSpec.endpoints.size == 1)
   }
 }

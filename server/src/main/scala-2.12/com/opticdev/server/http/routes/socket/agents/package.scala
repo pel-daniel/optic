@@ -3,10 +3,12 @@ package com.opticdev.server.http.routes.socket
 import akka.actor.ActorRef
 import better.files.{File, Files}
 import com.opticdev.arrow.changes.{ChangeGroup, JsonImplicits}
+import com.opticdev.common.spec_types.OpticProjectSnapshot
 import com.opticdev.common.{SchemaRef, VersionlessSchemaRef}
 import com.opticdev.core.sourcegear.graph.{NamedFile, NamedModel}
 import com.opticdev.core.sourcegear.project.status.ImmutableProjectStatus
 import com.opticdev.core.sourcegear.sync.SyncPatch
+import com.opticdev.runtime.RuntimeSessionResult
 import com.opticdev.sdk.descriptions.transformation.TransformationRef
 import play.api.libs.json._
 import com.opticdev.server.data.ToJsonImplicits._
@@ -34,6 +36,8 @@ package object agents {
 
     case class StartRuntimeAnalysis() extends AgentEvents
     case class FinishRuntimeAnalysis() extends AgentEvents
+
+    case class PrepareSnapshot() extends AgentEvents
 
     //Sends
     trait UpdateAgentEvent extends OpticEvent {
@@ -155,11 +159,23 @@ package object agents {
     ))
   }
 
-  case class RuntimeAnalysisFinished()(implicit val projectDirectory: String) extends OpticEvent with UpdateAgentEvent {
+  import JsonImplicits.runtimeSessionResultFormats
+  case class RuntimeAnalysisFinished(results: Option[RuntimeSessionResult], error: Option[String])(implicit val projectDirectory: String) extends OpticEvent with UpdateAgentEvent {
     override def asJson: JsValue = JsObject(Seq(
       "event"-> JsString("runtime-analysis-finished"),
-//      "error" -> (if (error.isDefined) JsString(error.get) else JsNull)
+      "isSuccess"-> JsBoolean(results.isDefined),
+      "results" -> (if (results.isDefined) Json.toJson(results) else JsNull),
+      "error" -> (if (error.isDefined) JsString(error.get) else JsNull)
     ))
   }
+
+  import com.opticdev.common.spec_types.SpecJSONSerialization._
+  case class DeliverSnapshot(opticProjectSnapshot: OpticProjectSnapshot)(implicit val projectDirectory: String) extends OpticEvent with UpdateAgentEvent {
+    override def asJson: JsValue = JsObject(Seq(
+      "event"-> JsString("deliver-snapshot"),
+      "snapshot" -> Json.toJson[OpticProjectSnapshot](opticProjectSnapshot)
+    ))
+  }
+
 
 }

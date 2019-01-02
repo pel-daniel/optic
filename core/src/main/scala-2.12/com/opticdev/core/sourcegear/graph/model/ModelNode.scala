@@ -2,7 +2,7 @@ package com.opticdev.core.sourcegear.graph.model
 
 import com.opticdev.common.utils.JsonUtils
 import com.opticdev.common.{ObjectRef, SchemaRef}
-import com.opticdev.core.sourcegear.{AstDebugLocation, CompiledLens, SGContext}
+import com.opticdev.core.sourcegear.{AstDebugLocation, CompiledLens, SGContext, SourceGear}
 import com.opticdev.core.sourcegear.actors.ActorCluster
 import com.opticdev.core.sourcegear.annotations.{SourceAnnotation, TagAnnotation}
 import com.opticdev.core.sourcegear.containers.ContainerAstMapping

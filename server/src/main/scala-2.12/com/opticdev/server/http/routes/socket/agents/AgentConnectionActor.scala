@@ -2,6 +2,7 @@ package com.opticdev.server.http.routes.socket.agents
 
 import akka.actor.{Actor, ActorRef, Status}
 import com.opticdev.arrow.changes.evaluation.BatchedChanges
+import com.opticdev.core.apis.AssembleProjectSpec
 import com.opticdev.core.sourcegear.SGContext
 import com.opticdev.core.sourcegear.actors.ParseSupervisorSyncAccess
 import com.opticdev.core.sourcegear.graph.model.{BaseModelNode, ModelNode}
@@ -140,8 +141,8 @@ class AgentConnectionActor(implicit projectDirectory: String, projectsManager: P
       } else {
         sessionStart.get.onComplete(i => {
           val response = if (i.isSuccess)
-            RuntimeAnalysisStarted(isSuccess = true, project.projectFile.interface.testcmd, None) else
-            RuntimeAnalysisStarted(isSuccess = false, None, Some(i.failed.get.getMessage))
+            RuntimeAnalysisStarted(isSuccess = true, project.projectFile.interface.testcmd, None)
+            else RuntimeAnalysisStarted(isSuccess = false, None, Some(i.failed.get.getMessage))
           AgentConnection.broadcastUpdate(response)
         })
       }
@@ -152,11 +153,20 @@ class AgentConnectionActor(implicit projectDirectory: String, projectsManager: P
         val finish = RuntimeManager.finish
         AgentConnection.broadcastUpdate(
           if (finish.isSuccess) {
-            RuntimeAnalysisFinished()
+            RuntimeAnalysisFinished(Some(finish.get), None)
           } else {
-            RuntimeAnalysisFinished()
+            RuntimeAnalysisFinished(None, Some(finish.failed.get.getMessage))
         })
       }
+    }
+
+    case PrepareSnapshot() => {
+      val project = projectsManager.projectForDirectory(projectDirectory)
+      project.onFirstPassComplete.map(i => {
+        project.snapshot(withAstGraph = true)
+          .map(snapshot => AssembleProjectSpec.fromSnapshot(snapshot, project.projectFile.interface.testcmd, project.name))
+          .foreach(result => AgentConnection.broadcastUpdate(DeliverSnapshot(result.result)))
+      })
     }
 
     case updateAgentEvent: UpdateAgentEvent => {

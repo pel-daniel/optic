@@ -37,7 +37,7 @@ package object project {
     def syncPatch: Future[SyncPatch]
     def shouldWatchFile(file: File) : Boolean
 
-    def trimAbsoluteFilePath(filePath: String) = {
+    def trimAbsoluteFilePath(filePath: String): String = {
       val split = filePath.split(baseDirectory.pathAsString)
       if (split.size == 2 && split(0).isEmpty) {
         split(1)

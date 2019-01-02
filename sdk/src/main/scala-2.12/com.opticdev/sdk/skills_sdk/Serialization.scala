@@ -96,7 +96,7 @@ object Serialization {
     override def reads(json: JsValue): JsResult[OMLensComponent] = {
       json.as[JsObject].value.keySet match {
         case x if x == Set("type", "at") => Json.fromJson[OMLensCodeComponent](json)
-        case x if x == Set("tokenAt", "processAs") || x == Set("tokenAt", "processAs", "identifier") => Json.fromJson[OMLensRuntimeComponent](json)
+        case x if x == Set("tokenAt", "processAs", "options") || x == Set("tokenAt", "processAs", "options", "identifier") => Json.fromJson[OMLensRuntimeComponent](json)
         case x if x == Set("fieldProcessor", "subcomponents", "enforceUniqueArguments") => Json.fromJson[OMLensComputedFieldComponent](json)
         case x if x.contains("schemaRef") => Json.fromJson[OMLensSchemaComponent](json)
         case x if x.contains("tokenAt") && x.contains("keyPath") => Json.fromJson[OMLensAssignmentComponent](json)

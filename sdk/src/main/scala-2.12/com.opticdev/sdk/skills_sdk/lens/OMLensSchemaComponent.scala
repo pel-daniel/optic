@@ -9,7 +9,8 @@ import com.opticdev.sdk.skills_sdk.OMRange
 case class OMLensSchemaComponent(schemaRef: SchemaRef,
                                  unique: Boolean = false,
                                  toMap: Option[String] = None, //key property. when defined mapping will be applied to an object keyed by this string
-                                 inContainer: Option[String] = None //only will search a container if defined, global if empty
+                                 inContainer: Option[String] = None, //only will search a container if defined, global if empty
+                                 takeFirst: Boolean = false
                                 ) extends OMLensComponent {
   override def rules: Vector[Rule] = Vector()
   def `type`: OMLensComponentType = NotSupported
@@ -24,8 +25,9 @@ case class OMLensSchemaComponent(schemaRef: SchemaRef,
     }
   }
 
-  def yieldsArray : Boolean = toMap.isEmpty
-  def yieldsObject : Boolean = toMap.isDefined
+  def yieldsInstance : Boolean = takeFirst
+  def yieldsArray : Boolean = !takeFirst && toMap.isEmpty
+  def yieldsObject : Boolean = !takeFirst && toMap.isDefined
 
 }
 

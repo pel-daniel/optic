@@ -8,7 +8,7 @@ import scalax.collection.edge.LkDiEdge
 import scalax.collection.mutable.Graph
 import com.opticdev.core.sourcegear.graph.GraphImplicits._
 import com.opticdev.core.sourcegear.graph.enums.AstPropertyRelationship
-import com.opticdev.core.sourcegear.graph.model.{BaseModelNode, LinkedModelNode, ModelNode, ModelVectorMapping}
+import com.opticdev.core.sourcegear.graph.model._
 import com.opticdev.common.graph.{AstGraph, CommonAstNode}
 import com.opticdev.sdk.descriptions.enums.LocationEnums.InCurrentLens
 import com.opticdev.core.sourcegear.context.SDKObjectsResolvedImplicits._
@@ -59,7 +59,9 @@ case class MapSchemaListener(schemaComponent: OMComponentWithPropertyPath[OMLens
       }
     }
 
-    if (schemaComponent.component.toMap.isDefined) {
+    if (schemaComponent.component.takeFirst) {
+      ModelField(schemaComponent.propertyPath, addToNodes.head.expandedValue(), ModelMapping(addToNodes.head.asInstanceOf[ModelNode]))
+    } else if (schemaComponent.component.toMap.isDefined) {
       val keyValues = addToNodes.map {
         n => {
           val value = n.expandedValue()

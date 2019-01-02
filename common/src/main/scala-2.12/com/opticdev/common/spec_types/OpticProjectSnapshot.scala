@@ -1,6 +1,8 @@
 package com.opticdev.common.spec_types
 
-case class OpticProjectSnapshot(apiSpec: OpticAPISpec,
+case class OpticProjectSnapshot(
+                           apiSpec: OpticAPISpec,
                            requestsSpec: Vector[String],
                            projectIssues: Vector[ProjectIssue],
-                           name: String)
+                           name: String,
+                           descriptions: Map[String, String] = Map())

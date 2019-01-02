@@ -86,7 +86,6 @@ abstract class OpticProject(val name: String, val baseDirectory: File)(implicit 
 
     if (sourceGear.configHash != lastSGHash && !sourceGear.isEmpty) {
 
-
       (if (!_loadingProjectPromise.isCompleted) _loadingProjectPromise.success(Unit))
 
       //should delete all

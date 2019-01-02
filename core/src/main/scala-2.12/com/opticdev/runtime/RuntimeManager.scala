@@ -28,13 +28,15 @@ object RuntimeManager {
     _session = Some(new RuntimeCollectionSession(project))
     _session.get.start(() => _session = None)
   }
-  def finish: Try[Vector[RuntimeValueFragment]] = Try(session.get.finish)
+  def finish: Try[RuntimeSessionResult] = Try(session.get.finish)
 
   /* Processing code */
 
   def stageSourceWrappers(snapshot: Snapshot): Vector[Try[WrapRequest]] = {
     val lensesIncludingListeners = snapshot.sourceGear.lensSet.listLenses.collect{ case baseLens: CompiledLens if baseLens.runtimeListener.nonEmpty => baseLens }
     val targetRuntimeNodes: Map[LensRef, Map[FlatModelNode, ExpandedModelNode]] = snapshot.linkedModelNodes.filter(model => lensesIncludingListeners.exists(_.lensRef == model._1.lensRef)).groupBy(_._1.lensRef)
+
+    println("Targets: "+ targetRuntimeNodes.values.flatten.size)
 
     lensesIncludingListeners.toVector.flatMap{ case lens =>
       val runtimeListener = lens.runtimeListener
@@ -47,9 +49,7 @@ object RuntimeManager {
           val fileRecord = (snapshot.astGraphs.get)(file)
           val astGraph = fileRecord.astGraph
           val targetNode = WalkablePath(parentLinked.root, flatWalkablePath.path, astGraph).walk(parentLinked.root, astGraph)
-
-
-          WrapRequest(targetNode, i._1.hash, file, componentWithPropertyPath.component.processAs == SchemaDef, componentWithPropertyPath)
+          WrapRequest(parentLinked.root, targetNode, i._1.hash, i._1.schemaId, file, componentWithPropertyPath.component.processAs == SchemaDef, componentWithPropertyPath.component.options, componentWithPropertyPath)
         }}
 
       }}.flatten
@@ -67,7 +67,7 @@ object RuntimeManager {
         val parser = snapshot.sourceGear.parsers.find(_.languageName == wrapRequests.head.targetNode.nodeType.language).get
 
         sortedAsc.foreach(wrap => {
-          val newContents = parser.runtimeHelper.get.generateCall(wrap.hash, wrap.componentWithPropertyPath.component.identifier, true, fileContents.substring(wrap.targetNode.range))
+          val newContents = parser.runtimeHelper.get.generateCall(wrap.hash, wrap.componentWithPropertyPath.component.identifier, true, wrap.componentWithPropertyPath.component.options, fileContents.substring(wrap.targetNode.range))
           stringBuilder.updateRange(wrap.targetNode.range, newContents)
         })
 
@@ -78,8 +78,9 @@ object RuntimeManager {
     }.toVector
   }
 
-  def applyFilePatches(filePatches: Vector[TempFilePatch]): Unit =
+  def applyFilePatches(filePatches: Vector[TempFilePatch]): Unit = {
     filePatches.foreach(i => Try(i.file.write(i.newContents)))
+  }
 
   def revertFilePatches(filePatches: Vector[TempFilePatch]): Unit =
     filePatches.foreach(i => Try(i.file.write(i.originalContents)))

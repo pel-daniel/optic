@@ -18,6 +18,7 @@ class RuntimeCollectionSession(project: OpticProject) {
 
   private var _filePatches: Vector[TempFilePatch] = Vector()
   private var _clearSession: () => Unit = null
+  private var _runtimeIncidenceTracker = new RuntimeIncidenceTracker()
 
   def start(clearSession: () => Unit) = {
     _clearSession = clearSession
@@ -34,21 +35,26 @@ class RuntimeCollectionSession(project: OpticProject) {
     setupFuture.map {
       case (snapshot, wrappers, filePatches) => {
         _filePatches = filePatches //save file patches in case we need to abort
+        _runtimeIncidenceTracker = new RuntimeIncidenceTracker(wrappers.collect{case i if i.isSuccess => i.get.toRuntimeTarget(snapshot)}:_*)
         RuntimeManager.applyFilePatches(filePatches)
         _isCollecting = true
       }
     }
   }
 
-  def finish: Vector[RuntimeValueFragment] = {
+  def finish: RuntimeSessionResult = {
     RuntimeManager.revertFilePatches(_filePatches)
     val fragments = _mutableList.toVector
     ProjectRuntimeFragmentStorage.addManyToStorage(fragments, project.name)
     project.setRuntimeFragments(fragments)
+    fragments.foreach(fragment => _runtimeIncidenceTracker.mark(fragment.modelHash))
     _isCollecting = false
     _clearSession()
-    println(fragments)
-    fragments
+
+    val issues = _runtimeIncidenceTracker.issues(project)
+    val results = _runtimeIncidenceTracker.results
+
+    RuntimeSessionResult(fragments, issues, results.size, results.count(_._2 != 0), results.values.sum)
   }
 
 }

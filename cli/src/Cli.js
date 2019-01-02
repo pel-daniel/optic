@@ -9,7 +9,6 @@ import {stopCmd} from "./commands/control/stop";
 import {installPluginsCmd} from "./commands/control/installplugins";
 import {initCmd} from "./commands/control/init";
 import {refreshCmd} from "./commands/control/refresh";
-import {createuserCmd} from "./commands/control/createuser";
 import {adduserCmd} from "./commands/control/adduser";
 import {syncCmd} from "./commands/optic/sync";
 import {serverStatus} from "./optic/IsRunning";
@@ -24,6 +23,7 @@ import {initStorage} from "./Storage";
 import {listCmd} from "./commands/control/list";
 import {inspectCmd} from "./commands/control/inspect";
 import {readtests} from "./commands/control/readtests";
+import {stageCmd} from "./commands/control/stage";
 
 const storage = initStorage()
 
@@ -40,6 +40,7 @@ commands.attachCommand(syncCmd)
 
 //Control Commands
 commands.attachCommand(initCmd)
+commands.attachCommand(adduserCmd)
 commands.attachCommand(startCmd)
 commands.attachCommand(stopCmd)
 commands.attachCommand(installPluginsCmd, true)
@@ -47,6 +48,7 @@ commands.attachCommand(refreshCmd)
 commands.attachCommand(listCmd, true, true)
 commands.attachCommand(inspectCmd, true, true)
 commands.attachCommand(readtests, true, true)
+commands.attachCommand(stageCmd, true, true)
 
 export const standardHelp = () => program.helpInformation()
 

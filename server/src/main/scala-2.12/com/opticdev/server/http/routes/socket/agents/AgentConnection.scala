@@ -90,6 +90,8 @@ class AgentConnection(projectDirectory: String, actorSystem: ActorSystem)(implic
               case "start-runtime-analysis" => StartRuntimeAnalysis()
               case "finish-runtime-analysis" => FinishRuntimeAnalysis()
 
+              case "prepare-snapshot" => PrepareSnapshot()
+
               //does not receive anything from agent...yet
               case _ => UnknownEvent(i)
             }

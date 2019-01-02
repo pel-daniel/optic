@@ -1,7 +1,6 @@
 package com.opticdev.common
 
-import com.opticdev.common.spec_types.{ApiIssue, Resolution}
-
+import com.opticdev.common.spec_types.{ApiIssue, IncompleteTestCoverage}
 package object api {
   case class EndpointIdentifier(shortname: String, file: String, lineRange: Range)
 
@@ -15,8 +14,9 @@ package object api {
   }
 
   trait SpecIssue {
+      val title: String
       val message: String
-      val resolutions: Vector[Resolution]
+      val doctag: String
       val level: Level
       val identifier: String
   }
@@ -24,4 +24,5 @@ package object api {
   sealed trait Level
   case object SpecError extends Level
   case object SpecWarning extends Level
+
 }

@@ -4,32 +4,21 @@ import boopickle.Default._
 import boopickle.DefaultBasic.PicklerGenerator
 import boopickle.PicklerHelper
 import com.opticdev.ParserSkillsColdStorage
-import com.opticdev.common.{PackageRef, SGExportable, SchemaRef}
-import com.opticdev.core.sourcegear.accumulate.{AssignmentListener, Listener, MapSchemaListener}
-import com.opticdev.core.sourcegear.context.FlatContext
-import com.opticdev.core.sourcegear.gears.RuleProvider
-import com.opticdev.core.sourcegear.gears.rendering.RenderGear
-import com.opticdev.core.sourcegear.gears.parsing.ParseAsModel
-import com.opticdev.core.sourcegear.serialization.PickleImplicits.SGExportableLensPickler.sgExportablePickler
-import com.opticdev.core.sourcegear.{CompiledLens, CompiledMultiNodeLens, SGConfig, SGExportableLens}
-import com.opticdev.opm.context.{Leaf, TreeContext}
-import com.opticdev.common.ParserRef
 import com.opticdev.common.graph.path.FlatWalkablePath
 import com.opticdev.common.graph.{AstType, Child}
+import com.opticdev.common.{PackageRef, ParserRef, SGExportable, SchemaRef}
+import com.opticdev.core.sourcegear.accumulate._
+import com.opticdev.core.sourcegear.context.FlatContext
+import com.opticdev.core.sourcegear.gears.parsing.ParseAsModel
+import com.opticdev.core.sourcegear.gears.rendering.RenderGear
 import com.opticdev.core.sourcegear.graph.objects.ObjectNode
-import com.opticdev.core.sourcegear.project.config.options.ConstantObject
+import com.opticdev.core.sourcegear.{CompiledLens, CompiledMultiNodeLens, SGConfig, SGExportableLens}
 import com.opticdev.runtime.RuntimeSourceListener
-import com.opticdev.sdk.descriptions._
-import com.opticdev.sdk.descriptions.enums.{BasicComponentType, Literal, NotSupported, Token}
-import com.opticdev.sdk.{BoolProperty, _}
-import com.opticdev.sdk.descriptions.enums.LocationEnums.LocationTypeEnums
 import com.opticdev.sdk.descriptions.transformation.Transformation
-import com.opticdev.sdk.rules.ChildrenRuleTypeEnum
 import com.opticdev.sdk.skills_sdk.compilerInputs.subcontainers.{OMContainerBase, OMSubContainer}
 import com.opticdev.sdk.skills_sdk.lens._
 import com.opticdev.sdk.skills_sdk.schema.{OMSchema, OMSchemaColdStorage}
-import org.mozilla.javascript.ast.ArrayLiteral
-import play.api.libs.json.{Format, JsObject, JsValue, Json}
+import play.api.libs.json.{JsObject, JsValue, Json}
 
 object PickleImplicits extends PicklerHelper {
 
@@ -75,20 +64,6 @@ object PickleImplicits extends PicklerHelper {
     }
   }
 
-//  implicit object OMEitherSchemaPickler extends P[Either[SchemaRef, OMSchema]] {
-//    override def pickle(obj: Either[SchemaRef, OMSchema])(implicit state: PickleState): Unit = {
-//      import com.opticdev.sdk.opticmarkdown2.Serialization._
-//      val jsonString = Json.toJson[Either[SchemaRef, OMSchema]](obj).toString()
-//      state.enc.writeString(jsonString)
-//    }
-//
-//    override def unpickle(implicit state: UnpickleState): Either[SchemaRef, OMSchema] = {
-//      import com.opticdev.sdk.opticmarkdown2.Serialization._
-//      val input = state.dec.readString
-//      Json.fromJson[Either[SchemaRef, OMSchema]](Json.parse(input).as[JsObject]).get
-//    }
-//  }
-
   implicit val childrenRuleTypeEnumPickler = {
     import com.opticdev.sdk.rules._
     compositePickler[ChildrenRuleTypeEnum]
@@ -116,6 +91,8 @@ object PickleImplicits extends PicklerHelper {
   implicit val componentPickler = {
     compositePickler[OMLensComponent]
       .addConcreteType[OMLensCodeComponent]
+      .addConcreteType[OMLensRuntimeComponent]
+      .addConcreteType[OMLensAssignmentComponent]
       .addConcreteType[OMLensSchemaComponent]
   }
 
@@ -128,7 +105,7 @@ object PickleImplicits extends PicklerHelper {
   }
 
   implicit val basicComponentEnumPickler = {
-    import com.opticdev.sdk.descriptions.enums.{BasicComponentType, NotSupported, Token, Literal, ObjectLiteral, ArrayLiteral}
+    import com.opticdev.sdk.descriptions.enums.{ArrayLiteral, BasicComponentType, Literal, NotSupported, ObjectLiteral, Token}
     compositePickler[BasicComponentType]
       .addConcreteType[NotSupported.type]
       .addConcreteType[Token.type]
@@ -136,6 +113,12 @@ object PickleImplicits extends PicklerHelper {
       .addConcreteType[ArrayLiteral.type]
       .addConcreteType[Literal.type]
 
+  }
+
+  implicit val runtimeAnalysisTarget = {
+    compositePickler[RuntimeAnalysisTarget]
+      .addConcreteType[SchemaDef.type]
+      .addConcreteType[ObjectDef.type]
   }
 
   implicit val containerPickler = {
@@ -152,9 +135,11 @@ object PickleImplicits extends PicklerHelper {
   implicit val childEdgePickler = PicklerGenerator.generatePickler[Child]
   implicit val flatWalkablePathPickler = PicklerGenerator.generatePickler[FlatWalkablePath]
 
+  implicit val runtimeSourcePickler = PicklerGenerator.generatePickler[RuntimeSourceListener]
+
   implicit val objectNodePickler = PicklerGenerator.generatePickler[ObjectNode]
 
-  import com.opticdev.sdk.{PropertyValue, StringProperty, NumberProperty, BoolProperty, ObjectProperty, ArrayProperty}
+  import com.opticdev.sdk.{ArrayProperty, BoolProperty, NumberProperty, ObjectProperty, PropertyValue, StringProperty}
 
   implicit val propertyValuePickler = compositePickler[PropertyValue]
   implicit val objectPropertyValuePickler = PicklerGenerator.generatePickler[ObjectProperty]
@@ -169,12 +154,14 @@ object PickleImplicits extends PicklerHelper {
 
   object ListenerPickler {
     implicit val listenerPickler = compositePickler[Listener]
-    listenerPickler.addConcreteType[Listener]
+    listenerPickler
       .addConcreteType[MapSchemaListener]
+      .addConcreteType[ComputedFieldListener]
+      .addConcreteType[RuntimeFieldListener]
       .addConcreteType[AssignmentListener]
   }
 
-  import ListenerPickler.listenerPickler
+  import ListenerPickler._
 
   implicit object ConmpiledLensPickler extends Pickler[CompiledLens] {
     override def pickle(value: CompiledLens)(implicit state: PickleState): Unit = {
@@ -212,7 +199,7 @@ object PickleImplicits extends PicklerHelper {
       .addConcreteType[CompiledLens]
   }
 
-  import FlatContextTreePickler.treePickler
+  import FlatContextTreePickler._
 
   implicit object CompiledMultiLensPickler extends Pickler[CompiledMultiNodeLens] {
     override def pickle(value: CompiledMultiNodeLens)(implicit state: PickleState): Unit = {
@@ -245,8 +232,7 @@ object PickleImplicits extends PicklerHelper {
       .addConcreteType[CompiledMultiNodeLens]
   }
 
-  import SGExportableLensPickler.sgExportablePickler
-
+  import SGExportableLensPickler._
 
   implicit object SGConfigPickler extends Pickler[SGConfig] {
     override def pickle(value: SGConfig)(implicit state: PickleState): Unit = {

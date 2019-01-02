@@ -27,20 +27,39 @@ export const readtests = {
 			}
 		})
 
-		agentConnection().onRuntimeAnalysisFinished((data) => {
-			console.log('Done')
+		agentConnection().onRuntimeAnalysisFinished(({isSuccess, results, error}) => {
+			const {issues, totalListeners, coverage, totalFragments} = results
+
+			if (isSuccess) {
+				console.log(colors.green(`Analysis Complete. Values for ${totalFragments} fields collected`))
+				console.log(`API Test Coverage: ${Math.floor((coverage / totalListeners) * 100).toFixed(0)}% (${coverage} / ${totalListeners})`)
+
+				if (coverage !== totalListeners) {
+					console.log(colors.red.underline('Unreached Branches:'))
+					issues.forEach( (issue, index) => {
+						console.log(`${index}) ${issue.message}`)
+					})
+				}
+
+			} else {
+				console.log(colors.red(`Internal error starting runtime analysis. Please run 'optic refresh' and try again. Error: ${error}`))
+			}
+
 			process.exit(0)
 		})
 
 	}
 }
 
-function runTest(testcmd) {
+
+export function runTest(testcmd, silent) {
 	exec(testcmd, {cwd: config.projectDirectory, stdio: "inherit"}, (err, stdout, stderr) => {
-		if (err) {
-			console.log(colors.red(err))
-		} else {
-			console.log(stdout)
+		if (!silent) {
+			if (err) {
+				console.log(colors.red(err))
+			} else {
+				console.log(stdout)
+			}
 		}
 		agentConnection().actions.finishRuntimeAnalysis()
 	})

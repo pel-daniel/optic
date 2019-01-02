@@ -2,13 +2,14 @@ package com.opticdev.sdk.skills_sdk.lens
 
 import com.opticdev.sdk.descriptions.{ChildrenRule, RawRule}
 import com.opticdev.sdk.rules.{Any, Rule}
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsObject, JsValue}
 
 import scala.util.{Random, Try}
 
 
 case class OMLensRuntimeComponent(tokenAt: OMFinder,
                                   processAs: RuntimeAnalysisTarget,
+                                  options: JsObject = JsObject.empty,
                                   identifier: String = Random.alphanumeric.take(9).mkString)
 
   extends OMLensComponent {
