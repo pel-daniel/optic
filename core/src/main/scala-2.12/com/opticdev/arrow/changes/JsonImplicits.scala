@@ -4,7 +4,7 @@ import com.opticdev.arrow.changes.location.{AsChildOf, Clipboard, InsertLocation
 import com.opticdev.arrow.graph.KnowledgeGraphImplicits.{DirectTransformation, TransformationChanges}
 import com.opticdev.arrow.results.ModelOption
 import com.opticdev.common.api.Level
-import com.opticdev.common.spec_types.IncompleteTestCoverage
+import com.opticdev.common.spec_types.{IncompleteTestCoverage, SpecJSONSerialization}
 import com.opticdev.common.{PackageRef, SchemaRef, fileFormat}
 import com.opticdev.core.sourcegear.sync.FilePatch
 import com.opticdev.runtime.{RuntimeSessionResult, RuntimeValueFragment}
@@ -20,7 +20,7 @@ object JsonImplicits {
   import com.opticdev.sdk.descriptions.transformation.TransformationRef.transformationRefJsonFormats
   import PackageRef.packageRefJsonFormat
   import SchemaRef.schemaRefFormats
-  import com.opticdev.common.spec_types.SpecJSONSerialization.apiLevelFormats
+  import com.opticdev.common.spec_types.SpecJSONSerialization.projectIssueFormats
   import com.opticdev.sdk.skills_sdk.Serialization.omschemaFormat
   import com.opticdev.sdk.skills_sdk.Serialization._
 
@@ -47,15 +47,6 @@ object JsonImplicits {
   }
 
   implicit val runtimeValueFragmentFormats = Json.format[RuntimeValueFragment]
-  implicit val incompleteTestCoverageFormats: Writes[IncompleteTestCoverage] = new Writes[IncompleteTestCoverage] {
-    override def writes(o: IncompleteTestCoverage): JsValue = Json.obj(
-      "title" -> o.title,
-      "message" -> o.message,
-      "level" -> Json.toJson[Level](o.level),
-      "identifier" -> o.identifier,
-      "doctag" -> o.doctag,
-    )
-  }
   implicit val runtimeSessionResultFormats = Json.writes[RuntimeSessionResult]
 
   //Insert Model

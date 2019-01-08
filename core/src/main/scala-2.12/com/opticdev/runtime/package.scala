@@ -43,7 +43,7 @@ package object runtime {
     def issues(project: OpticProject) = {
       _targets.filter(i => i._2 == 0 && apiTypes.contains(i._1.schemaRef.internalFull) ).map(target => {
         val trimmed = project.trimAbsoluteFilePath(target._1.file)
-        IncompleteTestCoverage(apiTypes(target._1.schemaRef.internalFull), trimmed, target._1.lineRange, target._1.contents)
+        IncompleteTestCoverage.from(apiTypes(target._1.schemaRef.internalFull), trimmed, target._1.lineRange, target._1.contents)
       }).toVector
     }
 

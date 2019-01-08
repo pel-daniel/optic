@@ -1,30 +1,45 @@
 import colors from 'colors'
 import config from '../../config'
-import gitBranch from 'git-branch'
 import niceTry from 'nice-try'
-import {agentConnection} from "../../optic/AgentSocket";
+import {agentConnection, closeConnection} from "../../optic/AgentSocket";
 import {Spinner} from 'cli-spinner'
 import {runTest} from "./readtests";
 import clear from 'clear'
 import {LoginUserRequest, PostSnapshot} from "../../api/Requests";
 import keytar from "keytar";
 import pJson from '../../../package'
+import opn from 'opn'
+import gitInfo from 'git-state'
 
 export const stageCmd = {
 	name: 'stage',
 	description: 'upload spec to useoptic.com',
-	options: [
-		["--headless", 'disables interactive prompts']
-	],
-	action: getStagedSpec
+	action: (cmd) => getStagedSpec(cmd, false)
 }
 
-export async function getStagedSpec(cmd) {
-	let branch = await niceTry(() => gitBranch(config.projectDirectory))
-	if (!branch) {
-		branch = 'master'
-		console.log(colors.yellow(`No git repository found for project. Defaulting to branch = 'master' `))
+export async function getStagedSpec(cmd, shouldPublish = false) {
+
+	const repoInfo = await new Promise(((resolve, reject) => {
+		gitInfo.isGit(config.projectDirectory, (exists) => {
+			if (!exists) resolve({branch: 'master', commitName: 'HEAD', isDirty: false})
+
+			gitInfo.check(config.projectDirectory, (err, {dirty, branch}) =>  {
+				if (err) reject(err)
+				const message =  niceTry(() => gitInfo.messageSync(config.projectDirectory))
+				if (shouldPublish) {
+					resolve({branch, commitName: message || 'HEAD', isDirty: dirty !== 0})
+				} else {
+					resolve({branch, commitName: 'HEAD', isDirty: dirty !== 0})
+				}
+			})
+		})
+	}))
+
+	if (repoInfo.isDirty && shouldPublish) {
+		console.error(colors.red(`Can not publish spec because project repo is dirty. Please commit and try again. If you are debugging, prefer 'optic stage'`))
+		closeConnection()
 	}
+
 
 	let spinner = startSpinner('Reading project...')
 
@@ -35,7 +50,7 @@ export async function getStagedSpec(cmd) {
 	agentConnection().onRuntimeAnalysisStarted((data) => {
 		if (data.isSuccess) {
 			spinner = startSpinner('Running tests...', spinner)
-			runTest(data.testcmd, true)
+			runTest(data.testcmd, true, true) //keeps it locked after running tests so file don't get updated from tests
 		} else {
 			spinner.stop()
 			console.log(colors.yellow(`Warning: Could not run tests. Try 'optic runtests' to debug`))
@@ -68,24 +83,37 @@ export async function getStagedSpec(cmd) {
 		console.log(colors.green(`${data.snapshot.apiSpec.endpoints.length} endpoints documented`))
 
 		//add runtime issues to project issues
-		data.snapshot.projectIssues = [...data.snapshot.projectIssues, runtimeIssues]
+		data.snapshot.projectIssues = [...data.snapshot.projectIssues, ...runtimeIssues]
 
-		PostSnapshot(data.snapshot.name, {snapshot: data.snapshot, opticVersion: pJson.version, branch})
-			.then((response) => {
-				console.log(response)
-			})
+		console.log(JSON.stringify(data.snapshot))
+
+		PostSnapshot(data.snapshot.name, {snapshot: data.snapshot, opticVersion: pJson.version, branch: repoInfo.branch, commitName: repoInfo.commitName, published: shouldPublish})
+			.then((response) => processResult(response))
 			.catch((error) => {
-				console.log("Could not save project snapshot" + colors.red(error.response.body))
-			}).finally(() => processResult())
+				if (!error.response) {
+					console.log(colors.red("\nCould not save project snapshot to server. Check internet connection"))
+				} else {
+					console.log(JSON.stringify(error.response.body))
+					if (error.statusCode === 401 || error.statusCode === 403) {
+						console.log(colors.red(`\nCould not save project snapshot to server. Client is not authorized. Run 'optic adduser' authenticate this client.`))
+						closeConnection()
+					}
+					console.log("\nCould not save project snapshot to server. " + colors.red(error.response.body))
+				}
+				closeConnection()
+			})
 	})
 
-	async function processResult() {
-		console.log('\nPress (return) to view or (r) to refresh')
+	async function processResult({projectId, branch, uuid}) {
+		console.log('\nPress (return) to view, (r) to refresh, or any other key to exit')
 		const cmd = await keypress()
-		console.log(cmd)
 		switch (cmd) {
-			case 'exit': process.exit()
-			case 'open': process.exit()
+			case 'exit': closeConnection()
+			case 'open': {
+				opn(`http://localhost:3000/#/projects/${projectId}/?branch=${encodeURIComponent(branch)}&version=${uuid}`)
+				closeConnection()
+				break;
+			}
 			case 'refresh': {
 				clear()
 				agentConnection().actions.startRuntimeAnalysis()

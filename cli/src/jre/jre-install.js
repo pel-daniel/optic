@@ -86,7 +86,6 @@
 
   const smoketest = exports.smoketest = () => {
       const p = path.join(__dirname, '../../resources')
-      console.log(p)
 	  return spawnSync([p], 'Smoketest', [], {encoding: 'utf8'})
 		  .stdout.trim() === 'No smoke!';
   }
@@ -120,7 +119,7 @@
       })
       .on('response', res => {
         var len = parseInt(res.headers['content-length'], 10);
-        var bar = new ProgressBar('downloading and preparing JRE + Optic Server [:bar] :percent :etas', {
+        var bar = new ProgressBar('downloading Optic Server [:bar] :percent :etas', {
           complete: '=',
           incomplete: ' ',
           width: 80,

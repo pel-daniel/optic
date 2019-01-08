@@ -31,7 +31,7 @@ class RuntimeAnalysisSpec extends RuntimeTestRig {
 
     val afterSetup = file.contentAsString
     assert(before != afterSetup)
-    RuntimeManager.session.get.finish
+    RuntimeManager.session.get.finish()
     val afterCleanup = file.contentAsString
     assert(afterCleanup == before)
   }
@@ -44,7 +44,7 @@ class RuntimeAnalysisSpec extends RuntimeTestRig {
     RuntimeManager.receiveFragment(RuntimeValueFragment("2", "hijklmnop", JsObject.empty))
     RuntimeManager.receiveFragment(RuntimeValueFragment("3", "hijklmnop", JsObject.empty))
 
-    val fragments = RuntimeManager.finish.get
+    val fragments = RuntimeManager.finish().get
     assert(fragments.runtimeFragments.size == 3)
   }
 

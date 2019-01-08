@@ -135,7 +135,6 @@ class AgentConnectionActor(implicit projectDirectory: String, projectsManager: P
       val project = projectsManager.projectForDirectory(projectDirectory)
       val projectGraph = project.projectGraph
       val sessionStart = Try(RuntimeManager.newSession(project))
-
       if (sessionStart.isFailure) {
         AgentConnection.broadcastUpdate(RuntimeAnalysisStarted(isSuccess = false, None, Some(sessionStart.failed.get.getMessage)))
       } else {
@@ -148,9 +147,9 @@ class AgentConnectionActor(implicit projectDirectory: String, projectsManager: P
       }
     }
 
-    case FinishRuntimeAnalysis() => {
+    case FinishRuntimeAnalysis(keepLocked) => {
       if (RuntimeManager.session.isDefined) {
-        val finish = RuntimeManager.finish
+        val finish = RuntimeManager.finish(keepLocked)
         AgentConnection.broadcastUpdate(
           if (finish.isSuccess) {
             RuntimeAnalysisFinished(Some(finish.get), None)
@@ -163,9 +162,13 @@ class AgentConnectionActor(implicit projectDirectory: String, projectsManager: P
     case PrepareSnapshot() => {
       val project = projectsManager.projectForDirectory(projectDirectory)
       project.onFirstPassComplete.map(i => {
-        project.snapshot(withAstGraph = true)
-          .map(snapshot => AssembleProjectSpec.fromSnapshot(snapshot, project.projectFile.interface.testcmd, project.name))
-          .foreach(result => AgentConnection.broadcastUpdate(DeliverSnapshot(result.result)))
+        project.snapshot(withAstGraph = true).onComplete(snapshot => {
+          if (snapshot.isSuccess) {
+            val result = AssembleProjectSpec.fromSnapshot(snapshot.get, project.projectFile.interface.testcmd, project.name)
+            AgentConnection.broadcastUpdate(DeliverSnapshot(result.result))
+            project.releaseParsing
+          }
+        })
       })
     }
 

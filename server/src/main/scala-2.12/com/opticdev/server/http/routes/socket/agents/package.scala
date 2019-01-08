@@ -35,7 +35,7 @@ package object agents {
     case class StageSync(editorSlug: String) extends AgentEvents
 
     case class StartRuntimeAnalysis() extends AgentEvents
-    case class FinishRuntimeAnalysis() extends AgentEvents
+    case class FinishRuntimeAnalysis(keepLocked: Boolean = false) extends AgentEvents
 
     case class PrepareSnapshot() extends AgentEvents
 

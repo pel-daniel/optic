@@ -24,6 +24,8 @@ import {listCmd} from "./commands/control/list";
 import {inspectCmd} from "./commands/control/inspect";
 import {readtests} from "./commands/control/readtests";
 import {stageCmd} from "./commands/control/stage";
+import {publishCmd} from "./commands/control/publish";
+import {finishInstallCmd} from "./commands/control/finishInstall";
 
 const storage = initStorage()
 
@@ -40,6 +42,7 @@ commands.attachCommand(syncCmd)
 
 //Control Commands
 commands.attachCommand(initCmd)
+commands.attachCommand(finishInstallCmd)
 commands.attachCommand(adduserCmd)
 commands.attachCommand(startCmd)
 commands.attachCommand(stopCmd)
@@ -49,6 +52,7 @@ commands.attachCommand(listCmd, true, true)
 commands.attachCommand(inspectCmd, true, true)
 commands.attachCommand(readtests, true, true)
 commands.attachCommand(stageCmd, true, true)
+commands.attachCommand(publishCmd, true, true)
 
 export const standardHelp = () => program.helpInformation()
 
@@ -71,7 +75,7 @@ async function processInput() {
 		track('First Time', {os: platform.os, nodeVersion: platform.version})
 		setupFlow()
 	} else if (!jreInstalled && !isDev) {
-		setupFlow(true)
+		setupFlow()
 	} else {
 		if (!process.argv.slice(2).length) {
 			//start interactive CLI if just 'optic' is passed

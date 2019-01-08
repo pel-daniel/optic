@@ -28,7 +28,7 @@ object RuntimeManager {
     _session = Some(new RuntimeCollectionSession(project))
     _session.get.start(() => _session = None)
   }
-  def finish: Try[RuntimeSessionResult] = Try(session.get.finish)
+  def finish(keepLocked: Boolean = false): Try[RuntimeSessionResult] = Try(session.get.finish(keepLocked))
 
   /* Processing code */
 

@@ -111,12 +111,17 @@ abstract class OpticProject(val name: String, val baseDirectory: File)(implicit 
     }
   }
 
+  private var _parsingLocked = false
+  private def parsingIsLocked = _parsingLocked
+  def lockParsing: Unit = this.synchronized(_parsingLocked = true)
+  def releaseParsing: Unit = this.synchronized(_parsingLocked = true)
+
   val handleFileChange : better.files.FileWatcher.Callback = {
     case (EventType.ENTRY_CREATE, file) => {
       implicit val sourceGear = projectSourcegear
       projectStatusInstance.touch
       filesStateMonitor.markUpdated(file)
-      if (shouldWatchFile(file)) projectActor ! FileCreated(file, this)
+      if (shouldWatchFile(file) && !parsingIsLocked) projectActor ! FileCreated(file, this)
     }
     case (EventType.ENTRY_MODIFY, file) => {
       if (!RuntimeManager.isCollecting) { //we don't want to accident process our temporary changes
@@ -126,7 +131,7 @@ abstract class OpticProject(val name: String, val baseDirectory: File)(implicit 
         if (projectFile.fileUpdateTriggersReload(file)) {
           projectFile.reload
         } else {
-          if (shouldWatchFile(file)) projectActor ! FileUpdated(file, this)
+          if (shouldWatchFile(file) && !parsingIsLocked) projectActor ! FileUpdated(file, this)
         }
       }
     }
@@ -134,7 +139,7 @@ abstract class OpticProject(val name: String, val baseDirectory: File)(implicit 
       implicit val sourceGear = projectSourcegear
       filesStateMonitor.markUpdated(file)
       projectStatusInstance.touch
-      if (shouldWatchFile(file)) projectActor ! FileDeleted(file, this)
+      if (shouldWatchFile(file) && !parsingIsLocked) projectActor ! FileDeleted(file, this)
     }
   }
 
@@ -159,8 +164,12 @@ abstract class OpticProject(val name: String, val baseDirectory: File)(implicit 
   val filesStateMonitor : FileStateMonitor = new FileStateMonitor()
   def stageFileContents(file: File, contents: String, fromContextQuery: Boolean = false): Future[Any] = {
     implicit val timeout: akka.util.Timeout = Timeout(10 seconds)
-    filesStateMonitor.stageContents(file, contents)
-    projectActor ? FileUpdatedInMemory(file, contents, this, fromContextQuery)(projectSourcegear)
+    if (!parsingIsLocked) {
+      filesStateMonitor.stageContents(file, contents)
+      projectActor ? FileUpdatedInMemory(file, contents, this, fromContextQuery)(projectSourcegear)
+    } else {
+      Future()
+    }
   }
 
   /* Control logic for watching files */

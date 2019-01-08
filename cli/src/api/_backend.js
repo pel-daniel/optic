@@ -6,7 +6,6 @@ export const getAuth = () => keytar.findPassword('optic-cli')
 
 export const authenticated = async (options = {}) => {
 	const token = await getAuth()
-	console.log(token)
 	if (token) {
 		return {...options, headers: {...options.headers, 'Authentication': 'Bearer '+token}}
 	} else {

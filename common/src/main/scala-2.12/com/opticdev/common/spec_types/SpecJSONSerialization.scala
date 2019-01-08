@@ -20,8 +20,8 @@ object SpecJSONSerialization {
     }
     override def writes(o: Range): JsValue = {
       JsObject(Seq(
-        "start" -> JsString(o.start.toString),
-        "end" -> JsString(o.start.toString)
+        "start" -> JsNumber(o.start),
+        "end" -> JsNumber(o.end)
       ))
     }
   }
@@ -29,7 +29,7 @@ object SpecJSONSerialization {
   //Api Spec
   implicit val apiLevelFormats = traitFormat[Level] << caseObjectFormat(SpecError) << caseObjectFormat(SpecWarning)
   implicit val apiIssueFormats = traitFormat[ApiIssue] << format[NoResponses] << format[RequestBodyWithoutSchema] << format[RequestBodyWithoutContentType] << format[ResponseBodyWithoutSchema] << format[ResponseBodyWithoutContentType]
-  implicit val projectIssueFormats = traitFormat[ProjectIssue] << caseObjectFormat(NoTestCommand) << format[IncompleteTestCoverage]
+  implicit val projectIssueFormats = traitFormat[ProjectIssue] << format[NoTestCommand] << format[IncompleteTestCoverage]
   implicit val opticAPIParameterFormats = Json.format[Parameter]
   implicit val opticAPIResponseFormats = Json.format[Response]
   implicit val opticAPIRequestBodyFormats = Json.format[RequestBody]

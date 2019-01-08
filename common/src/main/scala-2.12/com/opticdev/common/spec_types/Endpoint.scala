@@ -15,12 +15,19 @@ case class Endpoint(method: String,
 
   def identifier: String = s"${method} ${url}"
 
+  def pathParameters: Vector[PathParameter] = Endpoint.pathParameters(url)
+
   override def issues: Vector[ApiIssue] = {
     (if (responses.isEmpty) Vector(NoResponses(identifier)) else Vector()) ++
     (if (body.isDefined) body.get.issues else Vector()) ++
     parameters.flatMap(_.issues) ++
     responses.flatMap(_.issues)
   }
+}
+
+case class PathParameter(name: String, at: Range) extends ApiSpecificationComponent {
+  override def issues: Vector[ApiIssue] = Vector()
+  def identifier: String = s"path-parameter.${name}"
 }
 
 case class Parameter(in: String, name: String, required: Boolean = false, schema: Option[JsObject]) extends ApiSpecificationComponent {
@@ -48,6 +55,7 @@ case class Response(status: Int, `content-type`: Option[String], schema: Option[
 
 object EndpointValidation {
   val allowedMethods = Set("get", "post", "put", "delete", "options", "head")
+  val pathRegex = ":([a-zA-Z][a-zA-Z0-9]{1,})".r
 }
 
 object Endpoint {
@@ -59,4 +67,13 @@ object Endpoint {
   def fromJson(jsValue: JsValue, nameOption: Option[String]): JsResult[Endpoint] =
     Json.fromJson[Endpoint](jsValue)
         .map(_.copy(name = nameOption))
+
+  def pathParameters(url: String) =
+    EndpointValidation.pathRegex.findAllIn(url).matchData.toVector.map(i => {
+      val paramName = i.group(1)
+      val range = Range(i.start, i.end)
+
+      PathParameter(paramName, range)
+    })
+
 }

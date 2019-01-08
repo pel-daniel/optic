@@ -20,6 +20,11 @@ export function agentConnection(connectCallback) {
 	return _agentConnection
 }
 
+export function closeConnection() {
+	agentConnection().socket.close()
+	process.exit()
+}
+
 export function shouldStart() {
 	return new Promise((resolve, reject) => {
 		const agentC = agentConnection(() => {

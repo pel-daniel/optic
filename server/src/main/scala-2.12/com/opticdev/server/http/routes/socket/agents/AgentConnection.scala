@@ -10,7 +10,7 @@ import com.opticdev.arrow.changes.ChangeGroup
 import com.opticdev.common.{SchemaRef, VersionlessSchemaRef}
 import com.opticdev.sdk.descriptions.transformation.TransformationRef
 import com.opticdev.server.http.routes.socket._
-import play.api.libs.json.{JsNumber, JsObject, JsString, Json}
+import play.api.libs.json._
 import com.opticdev.server.http.routes.socket.agents.Protocol._
 import com.opticdev.server.http.routes.socket.editors.EditorConnection._
 import com.opticdev.server.state.ProjectsManager
@@ -88,7 +88,10 @@ class AgentConnection(projectDirectory: String, actorSystem: ActorSystem)(implic
                 }
               }
               case "start-runtime-analysis" => StartRuntimeAnalysis()
-              case "finish-runtime-analysis" => FinishRuntimeAnalysis()
+              case "finish-runtime-analysis" => {
+                val keepLocked = Try( (parsedTry.get \ "keepLocked").get.as[JsBoolean].value ).getOrElse(false)
+                FinishRuntimeAnalysis(keepLocked)
+              }
 
               case "prepare-snapshot" => PrepareSnapshot()
 

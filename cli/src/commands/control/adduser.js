@@ -23,12 +23,8 @@ export const adduserCmd = {
 
 			]).then((answers) => {
 			keytar.setPassword('optic-cli', 'main', answers.token.trim())
-			console.log('Token Saved. You are ready to go')
+			console.log('\nSuccess. Token Saved.')
+			process.exit()
 		})
 	}
-}
-
-
-function promptToken() {
-
 }

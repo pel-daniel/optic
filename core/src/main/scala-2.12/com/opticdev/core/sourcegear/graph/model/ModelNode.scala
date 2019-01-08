@@ -111,7 +111,7 @@ trait SingleModelNode extends BaseModelNode {
 
   private var expandedValueStore : Option[JsObject] = None
   def expandedValue(withVariables: Boolean = false)(implicit sourceGearContext: SGContext) : JsObject = {
-    if (expandedValueStore.isDefined) return expandedValueStore.get
+//    if (expandedValueStore.isDefined) return expandedValueStore.get  //disabling cache for now...leads to problems with runtime. not important for API version
 
     val listenersOption = sourceGearContext.fileAccumulator.listeners.get(lensRef)
     if (listenersOption.isDefined) {

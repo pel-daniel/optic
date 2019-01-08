@@ -1,7 +1,7 @@
 import colors from 'colors'
 import request from "request";
 import {track} from "../../Analytics";
-import {agentConnection, catchProjectErrors} from "../../optic/AgentSocket";
+import {agentConnection, catchProjectErrors, closeConnection} from "../../optic/AgentSocket";
 import clear from 'clear'
 import prettyjson from 'prettyjson'
 import {exec} from 'child_process'
@@ -45,22 +45,22 @@ export const readtests = {
 				console.log(colors.red(`Internal error starting runtime analysis. Please run 'optic refresh' and try again. Error: ${error}`))
 			}
 
-			process.exit(0)
+			closeConnection()
 		})
 
 	}
 }
 
 
-export function runTest(testcmd, silent) {
+export function runTest(testcmd, silent, keepLocked = false) {
 	exec(testcmd, {cwd: config.projectDirectory, stdio: "inherit"}, (err, stdout, stderr) => {
 		if (!silent) {
 			if (err) {
-				console.log(colors.red(err))
+				console.log(colors.red(stdout+err))
 			} else {
 				console.log(stdout)
 			}
 		}
-		agentConnection().actions.finishRuntimeAnalysis()
+		agentConnection().actions.finishRuntimeAnalysis(keepLocked)
 	})
 }

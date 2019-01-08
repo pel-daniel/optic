@@ -8,7 +8,7 @@ import scala.concurrent.Future
 import scala.util.Try
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class RuntimeCollectionSession(project: OpticProject) {
+class RuntimeCollectionSession(val project: OpticProject) {
   private var _isCollecting: Boolean = false
   def isCollecting: Boolean = _isCollecting
 
@@ -23,6 +23,7 @@ class RuntimeCollectionSession(project: OpticProject) {
   def start(clearSession: () => Unit) = {
     _clearSession = clearSession
     project.setRuntimeFragments(Vector())
+    project.lockParsing
     ProjectRuntimeFragmentStorage.clearStorage(project.name)
 
     val setupFuture: Future[(Snapshot, Vector[Try[WrapRequest]], Vector[TempFilePatch])] = for {
@@ -42,7 +43,7 @@ class RuntimeCollectionSession(project: OpticProject) {
     }
   }
 
-  def finish: RuntimeSessionResult = {
+  def finish(keepLocked: Boolean = false): RuntimeSessionResult = {
     RuntimeManager.revertFilePatches(_filePatches)
     val fragments = _mutableList.toVector
     ProjectRuntimeFragmentStorage.addManyToStorage(fragments, project.name)
@@ -53,6 +54,10 @@ class RuntimeCollectionSession(project: OpticProject) {
 
     val issues = _runtimeIncidenceTracker.issues(project)
     val results = _runtimeIncidenceTracker.results
+
+    if (!keepLocked) {
+      project.releaseParsing
+    }
 
     RuntimeSessionResult(fragments, issues, results.size, results.count(_._2 != 0), results.values.sum)
   }

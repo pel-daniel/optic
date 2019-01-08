@@ -9,6 +9,7 @@ object AssembleProjectSpec {
   case class ProjectSpecGenerationResult(result: OpticProjectSnapshot, errors: Vector[String])
 
   def fromSnapshot(snapshot: Snapshot, testcmd: Option[String], projectName: String): ProjectSpecGenerationResult = {
+
     val endpoints = snapshot
       .expandedValues
       .filter(i => i._1.schemaId.internalFull == "apiatlas:schemas/endpoint" && {
