@@ -8,7 +8,8 @@ case class Endpoint(method: String,
                     parameters: Vector[Parameter] = Vector(),
                     body: Option[RequestBody] = None,
                     responses: Vector[Response] = Vector(),
-                    name: Option[String] = None) extends ApiSpecificationComponent {
+                    name: Option[String] = None,
+                    authentication: Option[String] = None) extends ApiSpecificationComponent {
 
   require(EndpointValidation.allowedMethods.contains(method),
     s"Invalid HTTP Method ${method} is not one of ${EndpointValidation.allowedMethods.mkString(", ")}")
@@ -59,6 +60,8 @@ object EndpointValidation {
 }
 
 object Endpoint {
+  //do not remove. used for parsing from project graph
+  import SpecJSONSerialization.authenticationSchemaFormats
   implicit val responsesFormats = Json.using[Json.WithDefaultValues].format[Response]
   implicit val parameterFormats = Json.using[Json.WithDefaultValues].format[Parameter]
   implicit val requestBodyFormats = Json.using[Json.WithDefaultValues].format[RequestBody]

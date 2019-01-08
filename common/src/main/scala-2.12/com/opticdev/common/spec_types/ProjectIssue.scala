@@ -1,6 +1,6 @@
 package com.opticdev.common.spec_types
 
-import com.opticdev.common.api.{Level, SpecIssue, SpecWarning}
+import com.opticdev.common.api.{Level, SpecError, SpecIssue, SpecWarning}
 
 trait ProjectIssue extends SpecIssue
 
@@ -9,6 +9,13 @@ case class NoTestCommand(title: String = "Test Command not Configured",
                          level: Level = SpecWarning,
                          identifier: String,
                          doctag: String = "runtime-analysis") extends ProjectIssue
+
+case class InvalidAuthDefinition(
+                         message: String,
+                         identifier: String,
+                         title: String = "Invalid Auth Definition",
+                         level: Level = SpecError,
+                         doctag: String = "invalid-auth-definition") extends ProjectIssue
 
 case class IncompleteTestCoverage(apiType: String,
                                   file: String,

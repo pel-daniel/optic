@@ -12,7 +12,6 @@ import com.opticdev.sdk.skills_sdk.lens.SchemaDef
 import com.opticdev.marvin.common.helpers.InRangeImplicits._
 
 import scala.util.Try
-import com.opticdev.core.utils.StringBuilderImplicits._
 
 import scala.concurrent.Future
 

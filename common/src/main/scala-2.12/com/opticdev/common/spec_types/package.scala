@@ -2,7 +2,6 @@ package com.opticdev.common
 
 import com.opticdev.common.spec_types.{ApiIssue, IncompleteTestCoverage}
 package object api {
-  case class EndpointIdentifier(shortname: String, file: String, lineRange: Range)
 
   trait ApiSpecificationComponent {
     def issues: Vector[ApiIssue]

@@ -6,7 +6,6 @@ import com.opticdev.core.sourcegear.mutate.errors.{AstMappingNotFound, Component
 import com.opticdev.core.sourcegear.variables.VariableChanges
 import com.opticdev.common.graph.CommonAstNode
 import play.api.libs.json.JsObject
-import com.opticdev.core.utils.StringBuilderImplicits._
 import gnieh.diffson.playJson._
 import com.opticdev.common.graph.path.PropertyPathWalker
 

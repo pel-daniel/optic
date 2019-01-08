@@ -1,6 +1,5 @@
 package com.opticdev.core.sourcegear.sync
 import com.opticdev.core.sourcegear.project.ProjectBase
-import com.opticdev.core.utils.StringBuilderImplicits._
 import play.api.libs.json._
 
 import scala.collection.immutable

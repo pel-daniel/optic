@@ -3,7 +3,6 @@ package com.opticdev.core.utils
 import org.scalatest.FunSpec
 
 class StringBuilderImplicitsSpec extends FunSpec {
-  import com.opticdev.core.utils.StringBuilderImplicits._
 
   it("can update with contents of same length") {
     val exampleBuilder: StringBuilder = new StringBuilder("Hello World")

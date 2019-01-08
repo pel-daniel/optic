@@ -205,7 +205,6 @@ object MutationSteps {
 
   def combineChanges(astChanges: List[AstChange]) (implicit sourceGearContext: SGContext, fileContents: String): StringBuilder = {
     val failedUpdates = astChanges.filter(_.replacementString.isFailure)
-    import com.opticdev.core.utils.StringBuilderImplicits._
     val ordered = orderChanges(astChanges.filter(_.replacementString.isSuccess))
     ordered.foldLeft ( new StringBuilder(fileContents) ) {
       case (contents, change) => {

@@ -44,7 +44,6 @@ object MultiTransformEvaluation {
 
     FilesChanged(groupedByFile.map {
       case (file, patches)=> {
-        import com.opticdev.core.utils.StringBuilderImplicits._
 
         val fileContents = fileStateMonitor.contentsForFile(file.get).getOrElse("")
         val result = patches.reverse.foldLeft ( new StringBuilder(fileContents) ) {

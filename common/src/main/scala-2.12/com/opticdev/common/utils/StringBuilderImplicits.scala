@@ -1,4 +1,4 @@
-package com.opticdev.core.utils
+package com.opticdev.common.utils
 
 object StringBuilderImplicits {
   implicit class StringBuilderWithRangeUpdate(stringBuilder: scala.collection.mutable.StringBuilder) {

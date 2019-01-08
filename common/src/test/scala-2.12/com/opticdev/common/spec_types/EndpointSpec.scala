@@ -5,7 +5,7 @@ import org.scalatest.FunSpec
 class EndpointSpec extends FunSpec {
 
   describe("URL Parameters") {
-    def testUrl(url: String) = Endpoint.urlParameters(url)
+    def testUrl(url: String) = Endpoint.pathParameters(url)
 
     it("can extract a basic url parameter") {
       val params = testUrl("/basic/:world")

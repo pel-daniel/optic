@@ -64,7 +64,6 @@ if (!notifier.update || isDev) { //let's force updates
 }
 
 
-
 async function processInput() {
 
 	const firstRun = !(storage.getItemSync('firstRun'))
